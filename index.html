@@ -480,14 +480,24 @@ function openAddModal(){
                 <option value="traveller">Traveller (I will carry)</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="rfrom">From</label>
-              <input id="rfrom" name="from" type="text" required />
-            </div>
-            <div class="form-group">
-              <label for="rto">To</label>
-              <input id="rto" name="to" type="text" required />
-            </div>
+           <div class="form-group">
+              <label for="rfrom">From</label>
+                <div class="autocomplete-wrapper">
+                  <input id="rfrom" name="from" class="input" type="text" placeholder="City or Country" aria-label="From" autocomplete="off" required />
+                    <ul id="suggestionsAddFrom" class="suggestions-list"></ul>
+                    <input type="hidden" id="rfrom_cc" name="from_country" />
+                    <input type="hidden" id="rfrom_type" name="from_type" />
+                </div>
+            </div>
+            <div class="form-group">
+              <label for="rto">To</label>
+                <div class="autocomplete-wrapper">
+                  <input id="rto" name="to" class="input" type="text" placeholder="City or Country" aria-label="To" autocomplete="off" required />
+                    <ul id="suggestionsAddTo" class="suggestions-list"></ul>
+                    <input type="hidden" id="rto_cc" name="to_country" />
+                    <input type="hidden" id="rto_type" name="to_type" />
+                </div>
+            </div>
             <div class="form-group">
               <label for="rdate">Pickup date</label>
               <input id="rdate" name="datepickup" type="date" required />
