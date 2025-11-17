@@ -185,15 +185,15 @@
         </select>
       </div>
 
-      <div class="search-field" style="flex:1">
-            <div class="autocomplete-wrapper">
+     <div class="search-field" style="flex:1">
+            <div class="autocomplete-wrapper" style="flex:1">
                 <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or country)" aria-label="From" autocomplete="off" />
                 <ul id="suggestionsSearchFrom" class="suggestions-list"></ul>
                 <input type="hidden" id="searchFrom_cc" name="from_country" />
                 <input type="hidden" id="searchFrom_type" name="from_type" />
             </div>
 
-            <div class="autocomplete-wrapper">
+            <div class="autocomplete-wrapper" style="flex:1">
                 <input id="searchTo" class="input" type="text" placeholder="Going to (city or country)" aria-label="To" autocomplete="off" />
                 <ul id="suggestionsSearchTo" class="suggestions-list"></ul>
                 <input type="hidden" id="searchTo_cc" name="to_country" />
@@ -206,6 +206,7 @@
           type="date" 
           placeholder="When" 
           aria-label="Date" 
+          style="flex:1"
         />
         <script>
           /* If on mobile, switch to text mode initially so placeholder is visible */
