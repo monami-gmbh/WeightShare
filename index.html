@@ -54,48 +54,53 @@
   .copy-btn{background:#fff;color:var(--success);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:8px;cursor:pointer}
 
   /* Autocomplete specific styles */
-    .autocomplete-wrapper {
-        position: relative;
-        width: 100%; /* Important for inputs inside grid/flex containers */
-    }
-    .suggestions-list {
-        position: absolute;
-        top: 100%; /* Position right below the input */
-        left: 0;
-        right: 0;
-        background-color: #fff;
-        border: 1px solid #e6eef8;
-        border-top: none; /* Make it look like it's connected to the input */
-        border-radius: 0 0 8px 8px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        box-shadow: 0 4px 10px rgba(2,6,23,0.06);
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 100; /* Ensure it's above other elements */
-        display: none; /* Hidden by default */
-    }
-    .suggestions-list li {
-        padding: 10px 12px;
-        cursor: pointer;
-        font-size: 14px;
-        color: #0b1220;
-    }
-    .suggestions-list li:hover,
-    .suggestions-list li.active { /* 'active' class for keyboard navigation */
-        background-color: var(--blue);
-        color: #fff;
-    }
-    .suggestions-list li.active .muted-text {
-        color: rgba(255,255,255,0.7); /* Muted text in active state */
-    }
-    .suggestions-list li .muted-text {
-        color: var(--muted);
-        font-size: 12px;
-        margin-left: 8px;
-    }
-  
+  .autocomplete-wrapper {
+    position: relative;
+    display: flex; /* Make the wrapper itself a flex container */
+    flex: 1;      /* Allow it to grow in a flex context (for search bar) */
+    min-width: 0; /* Allow it to shrink if needed */
+  }
+  .autocomplete-wrapper .input {
+    width: 100%; /* Ensure the input fills the wrapper in modal and other non-flex contexts */
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+  }
+  .suggestions-list {
+    position: absolute;
+    top: 100%; /* Position right below the input */
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #e6eef8;
+    border-top: none; /* Make it look like it's connected to the input */
+    border-radius: 0 0 8px 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 4px 10px rgba(2,6,23,0.06);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100; /* Ensure it's above other elements */
+    display: none; /* Hidden by default */
+  }
+  .suggestions-list li {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #0b1220;
+  }
+  .suggestions-list li:hover,
+  .suggestions-list li.active { /* 'active' class for keyboard navigation */
+    background-color: var(--blue);
+    color: #fff;
+  }
+  .suggestions-list li.active .muted-text {
+    color: rgba(255,255,255,0.7); /* Muted text in active state */
+  }
+  .suggestions-list li .muted-text {
+    color: var(--muted);
+    font-size: 12px;
+    margin-left: 8px;
+  }
   /* --- MOBILE OPTIMIZATION START --- */
   @media (max-width:720px){
     /* General Layout */
@@ -187,19 +192,19 @@
       </div>
 
       <div class="search-field" style="flex:1">
-        <div class="autocomplete-wrapper" style="flex:1; min-width: 0;">
-            <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or country)" aria-label="From" autocomplete="off" />
-            <ul id="suggestionsSearchFrom" class="suggestions-list"></ul>
-            <input type="hidden" id="searchFrom_cc" name="from_country" />
-            <input type="hidden" id="searchFrom_type" name="from_type" />
-        </div>
+        <div class="autocomplete-wrapper">
+                <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or country)" aria-label="From" autocomplete="off" />
+                <ul id="suggestionsSearchFrom" class="suggestions-list"></ul>
+                <input type="hidden" id="searchFrom_cc" name="from_country" />
+                <input type="hidden" id="searchFrom_type" name="from_type" />
+            </div>
 
-        <div class="autocomplete-wrapper" style="flex:1; min-width: 0;">
-            <input id="searchTo" class="input" type="text" placeholder="Going to (city or country)" aria-label="To" autocomplete="off" />
-            <ul id="suggestionsSearchTo" class="suggestions-list"></ul>
-            <input type="hidden" id="searchTo_cc" name="to_country" />
-            <input type="hidden" id="searchTo_type" name="to_type" />
-        </div>
+            <div class="autocomplete-wrapper">
+                <input id="searchTo" class="input" type="text" placeholder="Going to (city or country)" aria-label="To" autocomplete="off" />
+                <ul id="suggestionsSearchTo" class="suggestions-list"></ul>
+                <input type="hidden" id="searchTo_cc" name="to_country" />
+                <input type="hidden" id="searchTo_type" name="to_type" />
+            </div>
         
         <input 
           id="searchDate" 
@@ -237,26 +242,40 @@
 <div id="toastRoot" style="position:fixed;top:0;left:0;right:0;pointer-events:none"></div>
 
 <script>
-/* CONFIG: set your worker URL and routes */
-const WORKER_URL = 'https://weightshare-backend.weightshare.workers.dev';
-const ADD_ROUTE = '/add-request';
+/* --- CONFIG --- */
+const WORKER_URL = 'https://weightshare-backend.your-worker-subdomain.workers.dev'; // <<< IMPORTANT: Update with YOUR actual deployed Worker URL!
 const LIST_ROUTE = '/list';
+const ADD_ROUTE = '/add-request';
 const CLOSE_ROUTE = '/close-request';
+const SEARCH_LOCATIONS_ROUTE = '/search-locations'; // New route for location search
 
-/* small helpers */
+// State to store selected location details (value, country code, type) for both search and add forms
+let searchState = {
+  from: { val: '', cc: '', type: '' }, // For search form 'from'
+  to:   { val: '', cc: '', type: '' }, // For search form 'to'
+  addFrom: { val: '', cc: '', type: '' }, // For add form 'from'
+  addTo:   { val: '', cc: '', type: '' }  // For add form 'to'
+};
+
+/* --- API HELPERS --- */
 const api = {
   async list(q = {}) {
-    // build query string
     const params = new URLSearchParams();
     if (q.from) params.set('from', q.from);
     if (q.to) params.set('to', q.to);
     if (q.datepickup) params.set('datepickup', q.datepickup);
     if (q.type) params.set('type', q.type);
+    if (q.from_country) params.set('from_country', q.from_country);
+    if (q.from_type) params.set('from_type', q.from_type);
+    if (q.to_country) params.set('to_country', q.to_country);
+    if (q.to_type) params.set('to_type', q.to_type);
+    
     const url = WORKER_URL + LIST_ROUTE + (params.toString() ? ('?' + params.toString()) : '');
     try {
       const r = await fetch(url);
       return await r.json();
     } catch (e) {
+      console.error("API Error (list):", e);
       return { status: 'error', message: String(e) };
     }
   },
@@ -269,6 +288,7 @@ const api = {
       });
       return await r.json();
     } catch (e) {
+      console.error("API Error (add):", e);
       return { status:'error', message:String(e) };
     }
   },
@@ -281,17 +301,35 @@ const api = {
       });
       return await r.json();
     } catch (e) {
+      console.error("API Error (close):", e);
       return { status:'error', message:String(e) };
+    }
+  },
+  async searchLocations(query) {
+    if (!query) return [];
+    const params = new URLSearchParams({ q: query });
+    const url = WORKER_URL + SEARCH_LOCATIONS_ROUTE + '?' + params.toString();
+    try {
+      const r = await fetch(url);
+      if (!r.ok) {
+          console.error(`Location search failed: ${r.statusText}`);
+          return [];
+      }
+      return await r.json();
+    } catch (e) {
+      console.error("API Error (searchLocations):", e);
+      return [];
     }
   }
 };
 
-/* UI helpers */
-function showToast(text, {auto=2200}={}) {
+/* --- UI HELPERS --- */
+function showToast(text, {auto=2200, background='var(--success)'}={}) {
   const root = document.getElementById('toastRoot');
-  root.innerHTML = `<div class="toast">${text}</div>`;
+  root.innerHTML = `<div class="toast" style="background:${background}">${text}</div>`;
   if (auto>0) setTimeout(()=>root.innerHTML='', auto);
 }
+
 function showSuccessModal(id) {
   const root = document.getElementById('successRoot');
   root.style.display = 'block';
@@ -315,7 +353,7 @@ function showSuccessModal(id) {
       await navigator.clipboard.writeText(id);
       showToast('ID copied to clipboard', {auto:1600});
     } catch (e) {
-      showToast('Could not copy', {auto:1600});
+      showToast('Could not copy', {auto:1600, background: '#ef4444'});
     }
   });
   document.getElementById('closeSuccess').addEventListener('click', ()=>{
@@ -324,7 +362,6 @@ function showSuccessModal(id) {
   });
 }
 
-/* normalization for whatsapp */
 function cleanPhoneForWa(phone) {
   if (!phone) return '';
   let p = phone.toString().trim();
@@ -333,7 +370,6 @@ function cleanPhoneForWa(phone) {
   return p;
 }
 
-/* group by date */
 function groupByDate(items){
   const map = {};
   items.forEach(it=>{
@@ -349,7 +385,6 @@ function groupByDate(items){
   return ordered;
 }
 
-/* render grouped list */
 function renderGrouped(list){
   const root = document.getElementById('resultsRoot');
   root.innerHTML = '';
@@ -365,22 +400,20 @@ function renderGrouped(list){
     const pretty = dateKey==='no-date' ? 'No date' : (new Date(dateKey)).toLocaleDateString(undefined, { weekday:'long', day:'numeric', month:'short' });
     h.innerHTML = `<div class="date-header">${pretty}</div>`;
     root.appendChild(h);
-    // tickets
+    
     group.forEach(item=>{
       const ticket = document.createElement('div');
       ticket.className = 'ticket';
       let typeLabel = '';
-      let notes = item.additionalinfo || '';
-      if (typeof notes === 'string') {
-        const m = notes.match(/^Type:\s*(shipper|traveller)\b[:\-\s]*/i);
-        if (m){ typeLabel = m[1].toLowerCase(); notes = notes.replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''); }
-      }
-      const from = item.from_loc || item.from || '';
-      const to = item.to_loc || item.to || '';
+      if (item.type) { typeLabel = item.type; } 
+      
+      const from = item.from_loc || item.from || ''; // Use from_loc for display consistency
+      const to = item.to_loc || item.to || '';     // Use to_loc for display consistency
       const name = item.name || '—';
       const mobile = item.mobile || '';
       const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
       const cleanMobile = cleanPhoneForWa(mobile);
+      
       ticket.innerHTML = `
         <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${name}">
           <div style="min-width:0">
@@ -401,7 +434,7 @@ function renderGrouped(list){
       ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
         ev.stopPropagation();
         const wa = ev.currentTarget.dataset.wa || '';
-        if (!wa) { showToast('No phone number'); return; }
+        if (!wa) { showToast('No phone number', {background: '#ef4444'}); return; }
         window.open('https://wa.me/' + wa, '_blank');
       });
       document.getElementById('resultsRoot').appendChild(ticket);
@@ -409,24 +442,28 @@ function renderGrouped(list){
   });
 }
 
-/* extended detail modal */
 function openDetail(item){
   const root = document.getElementById('modalRoot');
   root.style.display = 'block';
   const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
   const created = item.createdat ? new Date(item.createdat).toLocaleString() : '';
+  
+  const fromDisplay = item.from_loc || item.from || '—'; // Use from_loc for display consistency
+  const toDisplay = item.to_loc || item.to || '—';     // Use to_loc for display consistency
+  const typeDisplay = item.type || '—';
+
   root.innerHTML = `
     <div class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal">
-        <h3 style="margin-top:0">${item.from_loc || item.from || ''} → ${item.to_loc || item.to || ''}</h3>
+        <h3 style="margin-top:0">${fromDisplay} → ${toDisplay}</h3>
         <div style="display:flex;gap:12px;flex-wrap:wrap">
           <div style="flex:1">
             <p><strong>${item.name || '—'}</strong></p>
-            <p class="small-muted">Type: ${ (item.type || '—').match(/^Type:\s*(shipper|traveller)/i) ? ( (item.additionalinfo||'').match(/^Type:\s*(shipper|traveller)/i)[1] ) : '—' }</p>
+            <p class="small-muted">Type: ${typeDisplay}</p>
             <p class="small-muted">Date: ${item.datepickup || '—'}</p>
             <p class="small-muted">Phone: ${item.mobile || '—'}</p>
             <p class="small-muted">Email: ${item.email || '—'}</p>
-            <p style="margin-top:8px">${ (item.additionalinfo||'').replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,'') || '' }</p>
+            <p style="margin-top:8px">${item.additionalinfo || ''}</p>
           </div>
           <div style="width:160px;text-align:right">
             <div style="font-size:14px;color:var(--muted)">Price</div>
@@ -445,7 +482,7 @@ function openDetail(item){
   document.getElementById('closeDetailBtn').addEventListener('click', closeModalRoot);
   document.getElementById('closeRequestBtn').addEventListener('click', async ()=>{
     const confirmId = prompt('To confirm closing, enter the request ID:');
-    if (!confirmId || confirmId !== item.id) { alert('Cancelled or ID mismatch'); return; }
+    if (!confirmId || confirmId !== item.id) { showToast('Cancelled or ID mismatch', {background: '#ef4444'}); return; }
     showToast('Closing request...');
     const res = await api.close(item.id);
     if (res && res.status === 'ok') {
@@ -453,11 +490,120 @@ function openDetail(item){
       closeModalRoot();
       await doSearch(); // refresh
     } else {
-      showToast('Failed closing: ' + (res?.message || 'error'), {auto:3000});
+      showToast('Failed closing: ' + (res?.message || 'error'), {auto:3000, background: '#ef4444'});
     }
   });
 }
 function closeModalRoot(){ const root = document.getElementById('modalRoot'); root.style.display='none'; root.innerHTML=''; }
+
+/* Autocomplete Logic */
+let activeSuggestionIndex = -1; // For keyboard navigation
+
+function setupAutocomplete(inputElement, suggestionsListElement, stateKey, hiddenCcInput, hiddenTypeInput) {
+  let debounceTimeout;
+  const targetState = searchState[stateKey];
+
+  const updateHiddenFields = (suggestion) => {
+    if (suggestion) {
+      hiddenCcInput.value = suggestion.country_code || '';
+      hiddenTypeInput.value = suggestion.type || '';
+      targetState.val = suggestion.name;
+      targetState.cc = suggestion.country_code;
+      targetState.type = suggestion.type;
+    } else {
+      hiddenCcInput.value = '';
+      hiddenTypeInput.value = '';
+      targetState.val = inputElement.value; // Store whatever is typed if no suggestion is picked
+      targetState.cc = '';
+      targetState.type = '';
+    }
+  };
+
+  inputElement.addEventListener('input', () => {
+    clearTimeout(debounceTimeout);
+    targetState.val = inputElement.value; // Update state immediately for input
+    updateHiddenFields(null); // Clear hidden fields if typing
+    suggestionsListElement.style.display = 'none';
+    activeSuggestionIndex = -1;
+
+    if (inputElement.value.length < 2) {
+      return;
+    }
+
+    debounceTimeout = setTimeout(async () => {
+      const results = await api.searchLocations(inputElement.value);
+      displaySuggestions(results);
+    }, 300); // Debounce for 300ms
+  });
+
+  inputElement.addEventListener('keydown', (e) => {
+    const items = Array.from(suggestionsListElement.children);
+    if (items.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
+      highlightSuggestion(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
+      highlightSuggestion(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeSuggestionIndex > -1) {
+        items[activeSuggestionIndex].click();
+      } else {
+        // If Enter is pressed without selecting from suggestions, trigger form submit (if this is a search input)
+        if (inputElement.form.id === 'searchForm') {
+          doSearch();
+        } 
+        // For add form, no explicit action needed here, form submission is handled by overall form listener
+      }
+    } else if (e.key === 'Escape') {
+      suggestionsListElement.style.display = 'none';
+      activeSuggestionIndex = -1;
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!inputElement.parentElement.contains(e.target)) {
+      suggestionsListElement.style.display = 'none';
+      activeSuggestionIndex = -1;
+    }
+  });
+
+  const displaySuggestions = (suggestions) => {
+    suggestionsListElement.innerHTML = '';
+    if (suggestions && suggestions.length > 0) {
+      suggestions.forEach((suggestion, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${suggestion.name}</span> <span class="muted-text">${suggestion.country_name || suggestion.country_code || ''}</span>`;
+        li.addEventListener('click', () => {
+          inputElement.value = suggestion.name;
+          updateHiddenFields(suggestion);
+          suggestionsListElement.style.display = 'none';
+          activeSuggestionIndex = -1;
+        });
+        suggestionsListElement.appendChild(li);
+      });
+      suggestionsListElement.style.display = 'block';
+    } else {
+      suggestionsListElement.style.display = 'none';
+    }
+  };
+
+  const highlightSuggestion = (items) => {
+    items.forEach((item, index) => {
+      if (index === activeSuggestionIndex) {
+        item.classList.add('active');
+        item.scrollIntoView({ block: 'nearest' });
+      } else {
+        item.classList.remove('active');
+      }
+    });
+  };
+}
+
 
 /* Add request modal */
 function openAddModal(){
@@ -480,24 +626,24 @@ function openAddModal(){
                 <option value="traveller">Traveller (I will carry)</option>
               </select>
             </div>
-           <div class="form-group">
-              <label for="rfrom">From</label>
+            <div class="form-group">
+              <label for="rfrom">From</label>
                 <div class="autocomplete-wrapper">
-                  <input id="rfrom" name="from" class="input" type="text" placeholder="City or Country" aria-label="From" autocomplete="off" required />
-                    <ul id="suggestionsAddFrom" class="suggestions-list"></ul>
-                    <input type="hidden" id="rfrom_cc" name="from_country" />
-                    <input type="hidden" id="rfrom_type" name="from_type" />
+                  <input id="rfrom" name="from" class="input" type="text" placeholder="City or Country" aria-label="From" autocomplete="off" required />
+                  <ul id="suggestionsAddFrom" class="suggestions-list"></ul>
+                  <input type="hidden" id="rfrom_cc" name="from_country" />
+                  <input type="hidden" id="rfrom_type" name="from_type" />
                 </div>
-            </div>
-            <div class="form-group">
-              <label for="rto">To</label>
+            </div>
+            <div class="form-group">
+              <label for="rto">To</label>
                 <div class="autocomplete-wrapper">
-                  <input id="rto" name="to" class="input" type="text" placeholder="City or Country" aria-label="To" autocomplete="off" required />
-                    <ul id="suggestionsAddTo" class="suggestions-list"></ul>
-                    <input type="hidden" id="rto_cc" name="to_country" />
-                    <input type="hidden" id="rto_type" name="to_type" />
+                  <input id="rto" name="to" class="input" type="text" placeholder="City or Country" aria-label="To" autocomplete="off" required />
+                  <ul id="suggestionsAddTo" class="suggestions-list"></ul>
+                  <input type="hidden" id="rto_cc" name="to_country" />
+                  <input type="hidden" id="rto_type" name="to_type" />
                 </div>
-            </div>
+            </div>
             <div class="form-group">
               <label for="rdate">Pickup date</label>
               <input id="rdate" name="datepickup" type="date" required />
@@ -530,6 +676,22 @@ function openAddModal(){
   `;
   document.getElementById('cancelAdd').addEventListener('click', ()=>{ closeModalRoot(); });
   document.getElementById('addForm').addEventListener('submit', handleAddSubmit);
+
+  // Setup autocomplete for add modal fields AFTER they are rendered
+  setupAutocomplete(
+    document.getElementById('rfrom'),
+    document.getElementById('suggestionsAddFrom'),
+    'addFrom',
+    document.getElementById('rfrom_cc'),
+    document.getElementById('rfrom_type')
+  );
+  setupAutocomplete(
+    document.getElementById('rto'),
+    document.getElementById('suggestionsAddTo'),
+    'addTo',
+    document.getElementById('rto_cc'),
+    document.getElementById('rto_type')
+  );
 }
 
 /* submit add */
@@ -538,6 +700,15 @@ async function handleAddSubmit(e){
   const f = new FormData(e.target);
   const obj = Object.fromEntries(f.entries());
   
+  // Apply location data from searchState for add form
+  obj.from = searchState.addFrom.val;
+  obj.from_country = searchState.addFrom.cc;
+  obj.from_type = searchState.addFrom.type;
+
+  obj.to = searchState.addTo.val;
+  obj.to_country = searchState.addTo.cc;
+  obj.to_type = searchState.addTo.type;
+
   // if price empty -> null
   if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
   
@@ -548,28 +719,38 @@ async function handleAddSubmit(e){
     closeModalRoot();
     await doSearch();
   } else {
-    showToast('Submit failed: ' + (res?.message || 'network'), {auto:3500});
+    showToast('Submit failed: ' + (res?.message || 'network'), {auto:3500, background: '#ef4444'});
   }
 }
 
 /* search */
 async function doSearch(){
   const type = document.getElementById('searchType').value;
-  const from = document.getElementById('searchFrom').value;
-  const to = document.getElementById('searchTo').value;
+  const fromValue = searchState.from.val; // Use value from state
+  const fromCc = searchState.from.cc;
+  const fromType = searchState.from.type;
+
+  const toValue = searchState.to.val;     // Use value from state
+  const toCc = searchState.to.cc;
+  const toType = searchState.to.type;
+
   const date = document.getElementById('searchDate').value;
 
   showToast('Searching...', {auto:900});
 
   const data = await api.list({
     type,
-    from,
-    to,
+    from: fromValue,
+    from_country: fromCc,
+    from_type: fromType,
+    to: toValue,
+    to_country: toCc,
+    to_type: toType,
     datepickup: date
   });
 
   if (!Array.isArray(data)) {
-    showToast('Error loading results', {auto:3000});
+    showToast('Error loading results', {auto:3000, background: '#ef4444'});
     document.getElementById('resultsRoot').innerHTML = '<div class="small-muted">Failed to load results.</div>';
     return;
   }
@@ -581,9 +762,14 @@ async function doSearch(){
 document.getElementById('openAdd').addEventListener('click', openAddModal);
 document.getElementById('doSearch').addEventListener('click', (e)=>{ e.preventDefault(); doSearch(); });
 
-/* initial load */
-doSearch();
-</script>
+// Initial setup for the main search bar autocompletes
+setupAutocomplete(
+  document.getElementById('searchFrom'),
+  document.getElementById('suggestionsSearchFrom'),
+  'from',
+  document.getElementById('searchFrom_cc'),
+  document.getElementById('searchFrom_type')
+);
 
 </body>
 </html>
