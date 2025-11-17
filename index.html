@@ -150,12 +150,19 @@
         <input 
           id="searchDate" 
           class="date" 
-          type="text" 
+          type="date" 
           placeholder="Pickup Date" 
-          onfocus="(this.type='date')" 
-          onblur="(this.value ? this.type='date' : this.type='text')" 
           aria-label="Date" 
         />
+        <script>
+          /* If on mobile, switch to text mode initially so placeholder is visible */
+          if (window.innerWidth <= 720) {
+            const d = document.getElementById('searchDate');
+            d.type = 'text'; 
+            d.addEventListener('focus', function(){ this.type='date'; });
+            d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
+          }
+        </script>
       </div>
 
       <div>
