@@ -5,230 +5,177 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>WeightShare — Transport by Travellers</title>
 <style>
-  :root{
-    --blue:#0ea5ff;
-    --navy:#0f172a;
-    --muted:#6b7280;
-    --success:#16a34a;
-    --bg:#f8fafc;
-    --card:#ffffff;
-  }
-  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:#0b1220;background:var(--bg);}
-  .container{max-width:1100px;margin:0 auto;padding:20px;}
-  header{background:#fff;box-shadow:0 6px 18px rgba(12,13,19,0.06);position:sticky;top:0;z-index:60;}
-  .nav-wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;}
-  .logo{font-weight:700;color:var(--blue);font-size:20px;}
-  .nav-actions{display:flex;gap:14px;align-items:center}
-  .btn{background:var(--navy);color:#fff;padding:8px 14px;border-radius:10px;border:none;cursor:pointer}
-  .btn.ghost{background:transparent;color:var(--navy);border:1px solid #e6eef8}
-  .hero{height:260px;border-radius:10px;margin-top:20px;background-image: linear-gradient(90deg, rgba(6,11,26,0.65), rgba(6,11,26,0.25)), url('https://images.unsplash.com/photo-1501700493788-fa1a4fc9fe62?auto=format&fit=crop&w=1500&q=60');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#fff;}
-  .hero-inner{width:100%;max-width:980px;padding:18px}
-  .hero-title{font-size:26px;margin:0 0 12px;font-weight:700}
-  .search-bar{background:rgba(255,255,255,0.98);border-radius:12px;padding:12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 18px rgba(2,6,23,0.12);}
-  .search-field{display:flex;gap:8px;align-items:center}
-  .select,.input,.date{background:#fff;border:1px solid #e6eef8;padding:10px 12px;border-radius:8px;min-width:140px;font-size:14px;color:#0b1220}
-  .input{flex:1}
-  .search-btn{background:var(--blue);color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:600}
-  main{margin-top:22px}
-  .section-title{font-size:18px;margin:8px 0 14px;color:var(--navy);font-weight:600}
-  .date-group{margin-top:8px}
-  .date-header{font-weight:700;color:#0b1220;margin:18px 0 8px}
-  .ticket{display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:12px;border-radius:8px;box-shadow:0 4px 10px rgba(2,6,23,0.06);margin-bottom:8px;cursor:pointer}
-  .ticket-left{display:flex;gap:12px;align-items:center;flex:1;min-width:0}
-  .route{font-weight:700}
-  .meta{color:var(--muted);font-size:13px;margin-top:4px}
-  .whatsapp-btn{background:#25D366;color:#fff;padding:8px 10px;border-radius:8px;border:none;display:inline-flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}
-  .price{font-weight:800;font-size:16px;color:#0b1220;min-width:88px;text-align:right}
-  .small-muted{color:var(--muted);font-size:13px}
-  /* modal/backdrop */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:120}
-  .modal{width:100%;max-width:760px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 10px 40px rgba(2,6,23,0.3)}
-  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-  .form-group{display:flex;flex-direction:column;gap:6px}
-  label{font-size:13px;color:#111;font-weight:600}
-  input[type="text"], input[type="date"], input[type="tel"], input[type="email"], input[type="number"], select, textarea{padding:10px;border-radius:8px;border:1px solid #e6eef8;font-size:14px;background:#fff;outline:none}
-  textarea{resize:vertical;min-height:80px}
-  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
-  .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:200;box-shadow:0 8px 24px rgba(2,6,23,0.18)}
-  .success-modal .modal{max-width:520px;text-align:center}
-  .copy-btn{background:#fff;color:var(--success);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:8px;cursor:pointer}
+  :root{
+    --blue:#0ea5ff;
+    --navy:#0f172a;
+    --muted:#6b7280;
+    --success:#16a34a;
+    --bg:#f8fafc;
+    --card:#ffffff;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:#0b1220;background:var(--bg);}
+  .container{max-width:1100px;margin:0 auto;padding:20px;}
+  header{background:#fff;box-shadow:0 6px 18px rgba(12,13,19,0.06);position:sticky;top:0;z-index:60;}
+  .nav-wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;}
+  .logo{font-weight:700;color:var(--blue);font-size:20px;}
+  .nav-actions{display:flex;gap:14px;align-items:center}
+  .btn{background:var(--navy);color:#fff;padding:8px 14px;border-radius:10px;border:none;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--navy);border:1px solid #e6eef8}
+  .hero{height:260px;border-radius:10px;margin-top:20px;background-image: linear-gradient(90deg, rgba(6,11,26,0.65), rgba(6,11,26,0.25)), url('https://images.unsplash.com/photo-1501700493788-fa1a4fc9fe62?auto=format&fit=crop&w=1500&q=60');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#fff;}
+  .hero-inner{width:100%;max-width:980px;padding:18px}
+  .hero-title{font-size:26px;margin:0 0 12px;font-weight:700}
+  .search-bar{background:rgba(255,255,255,0.98);border-radius:12px;padding:12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 18px rgba(2,6,23,0.12);}
+  .search-field{display:flex;gap:8px;align-items:center}
+  .select,.input,.date{background:#fff;border:1px solid #e6eef8;padding:10px 12px;border-radius:8px;min-width:140px;font-size:14px;color:#0b1220}
+  .input{flex:1}
+  .search-btn{background:var(--blue);color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+  main{margin-top:22px}
+  .section-title{font-size:18px;margin:8px 0 14px;color:var(--navy);font-weight:600}
+  .date-group{margin-top:8px}
+  .date-header{font-weight:700;color:#0b1220;margin:18px 0 8px}
+  .ticket{display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:12px;border-radius:8px;box-shadow:0 4px 10px rgba(2,6,23,0.06);margin-bottom:8px;cursor:pointer}
+  .ticket-left{display:flex;gap:12px;align-items:center;flex:1;min-width:0}
+  .route{font-weight:700}
+  .meta{color:var(--muted);font-size:13px;margin-top:4px}
+  .whatsapp-btn{background:#25D366;color:#fff;padding:8px 10px;border-radius:8px;border:none;display:inline-flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}
+  .price{font-weight:800;font-size:16px;color:#0b1220;min-width:88px;text-align:right}
+  .small-muted{color:var(--muted);font-size:13px}
+  /* modal/backdrop */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:120}
+  .modal{width:100%;max-width:760px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 10px 40px rgba(2,6,23,0.3)}
+  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .form-group{display:flex;flex-direction:column;gap:6px}
+  label{font-size:13px;color:#111;font-weight:600}
+  input[type="text"], input[type="date"], input[type="tel"], input[type="email"], input[type="number"], select, textarea{padding:10px;border-radius:8px;border:1px solid #e6eef8;font-size:14px;background:#fff;outline:none}
+  textarea{resize:vertical;min-height:80px}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+  .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:200;box-shadow:0 8px 24px rgba(2,6,23,0.18)}
+  .success-modal .modal{max-width:520px;text-align:center}
+  .copy-btn{background:#fff;color:var(--success);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:8px;cursor:pointer}
+  
+  /* --- MOBILE OPTIMIZATION START --- */
+  @media (max-width:720px){
+    /* General Layout */
+    .container { padding: 15px; }
+    
+    /* Hero Section - Auto height to fit stacked search bar */
+    .hero { height: auto; padding: 25px 15px; text-align: center; }
+    .hero-title { font-size: 22px; line-height: 1.3; }
+    
+    /* Search Bar - Stacked */
+    .search-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+    .search-field { flex-direction: column; width: 100%; }
+    .input, .select, .date { width: 100%; box-sizing: border-box; height: 44px; } /* Bigger touch targets */
+    .search-btn { width: 100%; height: 44px; margin-top: 4px; }
 
-    /* Autocomplete specific styles */
-    .autocomplete-wrapper {
-        position: relative;
-        width: 100%;
-    }
-    .suggestions-list {
-        position: absolute;
-        top: 100%; /* Position right below the input */
-        left: 0;
-        right: 0;
-        background-color: #fff;
-        border: 1px solid #e6eef8;
-        border-top: none;
-        border-radius: 0 0 8px 8px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        box-shadow: 0 4px 10px rgba(2,6,23,0.06);
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 100; /* Ensure it's above other elements */
-    }
-    .suggestions-list li {
-        padding: 10px 12px;
-        cursor: pointer;
-        font-size: 14px;
-        color: #0b1220;
-    }
-    .suggestions-list li:hover,
-    .suggestions-list li.active { /* 'active' class for keyboard navigation */
-        background-color: var(--blue);
-        color: #fff;
-    }
-    .suggestions-list li.active .muted-text {
-        color: rgba(255,255,255,0.7); /* Muted text in active state */
-    }
-    .suggestions-list li .muted-text {
-        color: var(--muted);
-        font-size: 12px;
-        margin-left: 8px;
-    }
-  
-  /* --- MOBILE OPTIMIZATION START --- */
-  @media (max-width:720px){
-    /* General Layout */
-    .container { padding: 15px; }
-    
-    /* Hero Section - Auto height to fit stacked search bar */
-    .hero { height: auto; padding: 25px 15px; text-align: center; }
-    .hero-title { font-size: 22px; line-height: 1.3; }
-    
-    /* Search Bar - Stacked */
-    .search-bar { flex-direction: column; align-items: stretch; gap: 12px; }
-    .search-field { flex-direction: column; width: 100%; }
-    .input, .select, .date { width: 100%; box-sizing: border-box; height: 44px; } /* Bigger touch targets */
-    .search-btn { width: 100%; height: 44px; margin-top: 4px; }
+    /* Modals */
+    .form-grid{grid-template-columns:1fr}
+    .modal { width: 90%; margin: 10px; max-height: 85vh; overflow-y: auto; }
 
-    /* Modals */
-    .form-grid{grid-template-columns:1fr}
-    .modal { width: 90%; margin: 10px; max-height: 85vh; overflow-y: auto; }
+    /* Ticket Results - Card View */
+    .ticket { 
+      flex-direction: column; 
+      align-items: stretch; 
+      padding: 16px;
+      position: relative;
+    }
+    
+    /* Move Price to Top for visibility */
+    .price { 
+      order: -1; 
+      width: 100%; 
+      text-align: left; 
+      margin-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 8px;
+      color: var(--blue);
+      font-size: 18px;
+    }
+    
+    /* Ticket content wrapper */
+    .ticket-left { 
+      flex-direction: column; 
+      align-items: flex-start; 
+      width: 100%; 
+    }
+    .ticket-left > div:first-child { width: 100%; } /* Route text */
+    
+    /* WhatsApp Button - Full Width */
+    .ticket-left > div:last-child { 
+      margin-left: 0; 
+      width: 100%; 
+      margin-top: 12px; 
+    }
+    .whatsapp-btn { 
+      width: 100%; 
+      justify-content: center; 
+      padding: 12px;
+      font-size: 15px;
+    }
+  }
+  /* --- MOBILE OPTIMIZATION END --- */
 
-    /* Ticket Results - Card View */
-    .ticket { 
-      flex-direction: column; 
-      align-items: stretch; 
-      padding: 16px;
-      position: relative;
-    }
-    
-    /* Move Price to Top for visibility */
-    .price { 
-      order: -1; 
-      width: 100%; 
-      text-align: left; 
-      margin-bottom: 8px;
-      border-bottom: 1px solid #f1f5f9;
-      padding-bottom: 8px;
-      color: var(--blue);
-      font-size: 18px;
-    }
-    
-    /* Ticket content wrapper */
-    .ticket-left { 
-      flex-direction: column; 
-      align-items: flex-start; 
-      width: 100%; 
-    }
-    .ticket-left > div:first-child { width: 100%; } /* Route text */
-    
-    /* WhatsApp Button - Full Width */
-    .ticket-left > div:last-child { 
-      margin-left: 0; 
-      width: 100%; 
-      margin-top: 12px; 
-    }
-    .whatsapp-btn { 
-      width: 100%; 
-      justify-content: center; 
-      padding: 12px;
-      font-size: 15px;
-    }
-  }
-  /* --- MOBILE OPTIMIZATION END --- */
-
-  /* icons */
-  .wa-icon{width:18px;height:18px;display:inline-block}
+  /* icons */
+  .wa-icon{width:18px;height:18px;display:inline-block}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="container nav-wrap">
-    <div class="logo">WeightShare</div>
-    <div class="nav-actions">
-      <button id="openAdd" class="btn">➕ Add Request</button>
-    </div>
-  </div>
+  <div class="container nav-wrap">
+    <div class="logo">WeightShare</div>
+    <div class="nav-actions">
+      <button id="openAdd" class="btn">➕ Add Request</button>
+    </div>
+  </div>
 </header>
 
 <section class="hero">
-  <div class="hero-inner container">
-    <div class="hero-title">Send or transport parcels with travellers — faster and cheaper</div>
+  <div class="hero-inner container">
+    <div class="hero-title">Send or transport parcels with travellers — faster and cheaper</div>
 
-    <form id="searchForm" class="search-bar" role="search" aria-label="Search transport requests">
-      <div class="search-field" style="min-width:200px;max-width:260px;">
-        <select id="searchType" class="select" aria-label="Request type">
-          <option value="">Any type</option>
-          <option value="shipper">Shipper (looking to send)</option>
-          <option value="traveller">Traveller (offering transport)</option>
-        </select>
-      </div>
+    <form id="searchForm" class="search-bar" role="search" aria-label="Search transport requests">
+      <div class="search-field" style="min-width:200px;max-width:260px;">
+        <select id="searchType" class="select" aria-label="Request type">
+          <option value="">Any type</option>
+          <option value="shipper">Shipper (looking to send)</option>
+          <option value="traveller">Traveller (offering transport)</option>
+        </select>
+      </div>
 
-      <div class="search-field" style="flex:1">
-            <div class="autocomplete-wrapper">
-                <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or country)" aria-label="From" autocomplete="off" />
-                <ul id="suggestionsSearchFrom" class="suggestions-list"></ul>
-                <input type="hidden" id="searchFrom_cc" name="from_country" />
-                <input type="hidden" id="searchFrom_type" name="from_type" />
-            </div>
+      <div class="search-field" style="flex:1">
+        <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or airport)" aria-label="From" />
+        <input id="searchTo" class="input" type="text" placeholder="Going to (city or airport)" aria-label="To" />
+        
+        <input 
+          id="searchDate" 
+          class="date" 
+          type="date" 
+          placeholder="When" 
+          aria-label="Date" 
+        />
+        <script>
+          /* If on mobile, switch to text mode initially so placeholder is visible */
+          if (window.innerWidth <= 720) {
+            const d = document.getElementById('searchDate');
+            d.type = 'text'; 
+            d.addEventListener('focus', function(){ this.type='date'; });
+            d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
+          }
+        </script>
+      </div>
 
-            <div class="autocomplete-wrapper">
-                <input id="searchTo" class="input" type="text" placeholder="Going to (city or country)" aria-label="To" autocomplete="off" />
-                <ul id="suggestionsSearchTo" class="suggestions-list"></ul>
-                <input type="hidden" id="searchTo_cc" name="to_country" />
-                <input type="hidden" id="searchTo_type" name="to_type" />
-            </div>
-        
-        <input 
-          id="searchDate" 
-          class="date" 
-          type="date" 
-          placeholder="When" 
-          aria-label="Date" 
-        />
-        <script>
-          /* If on mobile, switch to text mode initially so placeholder is visible */
-          if (window.innerWidth <= 720) {
-            const d = document.getElementById('searchDate');
-            d.type = 'text'; 
-            d.addEventListener('focus', function(){ this.type='date'; });
-            d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
-          }
-        </script>
-      </div>
-
-      <div>
-        <button id="doSearch" class="search-btn">Search</button>
-      </div>
-    </form>
-  </div>
+      <div>
+        <button id="doSearch" class="search-btn">Search</button>
+      </div>
+    </form>
+  </div>
 </section>
 
 <main class="container">
-  <h3 class="section-title">Open Requests</h3>
-  <div id="resultsRoot" aria-live="polite">
-    </div>
+  <h3 class="section-title">Open Requests</h3>
+  <div id="resultsRoot" aria-live="polite">
+    </div>
 </main>
 
 <div id="modalRoot" style="display:none"></div>
@@ -236,24 +183,61 @@
 <div id="toastRoot" style="position:fixed;top:0;left:0;right:0;pointer-events:none"></div>
 
 <script>
-/* --- CONFIG --- */
-const WORKER_URL = 'https://weightshare-backend.your-worker-subdomain.workers.dev'; // <<< IMPORTANT: Use YOUR PRODUCTION Worker URL here!
+/* CONFIG: set your worker URL and routes */
+const WORKER_URL = 'https://weightshare-backend.weightshare.workers.dev';
+const ADD_ROUTE = '/add-request';
+const LIST_ROUTE = '/list';
+const CLOSE_ROUTE = '/close-request';
 
-// State to store selected details (City name, Country Code, Type) for both search and add forms
-let searchState = {
-  from: { val: '', cc: '', type: '' }, // For search form 'from'
-  to:   { val: '', cc: '', type: '' }, // For search form 'to'
-  addFrom: { val: '', cc: '', type: '' }, // For add form 'from'
-  addTo:   { val: '', cc: '', type: '' }  // For add form 'to'
+/* small helpers */
+const api = {
+  async list(q = {}) {
+    // build query string
+    const params = new URLSearchParams();
+    if (q.from) params.set('from', q.from);
+    if (q.to) params.set('to', q.to);
+    if (q.datepickup) params.set('datepickup', q.datepickup);
+    if (q.type) params.set('type', q.type);
+    const url = WORKER_URL + LIST_ROUTE + (params.toString() ? ('?' + params.toString()) : '');
+    try {
+      const r = await fetch(url);
+      return await r.json();
+    } catch (e) {
+      return { status: 'error', message: String(e) };
+    }
+  },
+  async add(payload) {
+    try {
+      const r = await fetch(WORKER_URL + ADD_ROUTE, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      return await r.json();
+    } catch (e) {
+      return { status:'error', message:String(e) };
+    }
+  },
+  async close(id) {
+    try {
+      const r = await fetch(WORKER_URL + CLOSE_ROUTE, {
+        method: 'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ id })
+      });
+      return await r.json();
+    } catch (e) {
+      return { status:'error', message:String(e) };
+    }
+  }
 };
 
-/* --- UI HELPERS --- */
-function showToast(text, {auto=2200, background='var(--success)'}={}) {
+/* UI helpers */
+function showToast(text, {auto=2200}={}) {
   const root = document.getElementById('toastRoot');
-  root.innerHTML = `<div class="toast" style="background:${background}">${text}</div>`;
+  root.innerHTML = `<div class="toast">${text}</div>`;
   if (auto>0) setTimeout(()=>root.innerHTML='', auto);
 }
-
 function showSuccessModal(id) {
   const root = document.getElementById('successRoot');
   root.style.display = 'block';
@@ -277,7 +261,7 @@ function showSuccessModal(id) {
       await navigator.clipboard.writeText(id);
       showToast('ID copied to clipboard', {auto:1600});
     } catch (e) {
-      showToast('Could not copy', {auto:1600, background: '#ef4444'});
+      showToast('Could not copy', {auto:1600});
     }
   });
   document.getElementById('closeSuccess').addEventListener('click', ()=>{
@@ -286,6 +270,7 @@ function showSuccessModal(id) {
   });
 }
 
+/* normalization for whatsapp */
 function cleanPhoneForWa(phone) {
   if (!phone) return '';
   let p = phone.toString().trim();
@@ -294,6 +279,7 @@ function cleanPhoneForWa(phone) {
   return p;
 }
 
+/* group by date */
 function groupByDate(items){
   const map = {};
   items.forEach(it=>{
@@ -309,6 +295,7 @@ function groupByDate(items){
   return ordered;
 }
 
+/* render grouped list */
 function renderGrouped(list){
   const root = document.getElementById('resultsRoot');
   root.innerHTML = '';
@@ -324,20 +311,22 @@ function renderGrouped(list){
     const pretty = dateKey==='no-date' ? 'No date' : (new Date(dateKey)).toLocaleDateString(undefined, { weekday:'long', day:'numeric', month:'short' });
     h.innerHTML = `<div class="date-header">${pretty}</div>`;
     root.appendChild(h);
-    
+    // tickets
     group.forEach(item=>{
       const ticket = document.createElement('div');
       ticket.className = 'ticket';
       let typeLabel = '';
-      if (item.type) { typeLabel = item.type; } 
-      
-      const from = item.from_loc || item.from || ''; // Use from_loc for display consistency
-      const to = item.to_loc || item.to || '';     // Use to_loc for display consistency
+      let notes = item.additionalinfo || '';
+      if (typeof notes === 'string') {
+        const m = notes.match(/^Type:\s*(shipper|traveller)\b[:\-\s]*/i);
+        if (m){ typeLabel = m[1].toLowerCase(); notes = notes.replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''); }
+      }
+      const from = item.from_loc || item.from || '';
+      const to = item.to_loc || item.to || '';
       const name = item.name || '—';
       const mobile = item.mobile || '';
       const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
       const cleanMobile = cleanPhoneForWa(mobile);
-      
       ticket.innerHTML = `
         <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${name}">
           <div style="min-width:0">
@@ -358,7 +347,7 @@ function renderGrouped(list){
       ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
         ev.stopPropagation();
         const wa = ev.currentTarget.dataset.wa || '';
-        if (!wa) { showToast('No phone number', {background: '#ef4444'}); return; }
+        if (!wa) { showToast('No phone number'); return; }
         window.open('https://wa.me/' + wa, '_blank');
       });
       document.getElementById('resultsRoot').appendChild(ticket);
@@ -366,28 +355,24 @@ function renderGrouped(list){
   });
 }
 
+/* extended detail modal */
 function openDetail(item){
   const root = document.getElementById('modalRoot');
   root.style.display = 'block';
   const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
   const created = item.createdat ? new Date(item.createdat).toLocaleString() : '';
-  
-  const fromDisplay = item.from_loc || item.from || '—';
-  const toDisplay = item.to_loc || item.to || '—';
-  const typeDisplay = item.type || '—';
-
   root.innerHTML = `
     <div class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal">
-        <h3 style="margin-top:0">${fromDisplay} → ${toDisplay}</h3>
+        <h3 style="margin-top:0">${item.from_loc || item.from || ''} → ${item.to_loc || item.to || ''}</h3>
         <div style="display:flex;gap:12px;flex-wrap:wrap">
           <div style="flex:1">
             <p><strong>${item.name || '—'}</strong></p>
-            <p class="small-muted">Type: ${typeDisplay}</p>
+            <p class="small-muted">Type: ${ (item.type || '—').match(/^Type:\s*(shipper|traveller)/i) ? ( (item.additionalinfo||'').match(/^Type:\s*(shipper|traveller)/i)[1] ) : '—' }</p>
             <p class="small-muted">Date: ${item.datepickup || '—'}</p>
             <p class="small-muted">Phone: ${item.mobile || '—'}</p>
             <p class="small-muted">Email: ${item.email || '—'}</p>
-            <p style="margin-top:8px">${item.additionalinfo || ''}</p>
+            <p style="margin-top:8px">${ (item.additionalinfo||'').replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,'') || '' }</p>
           </div>
           <div style="width:160px;text-align:right">
             <div style="font-size:14px;color:var(--muted)">Price</div>
@@ -406,7 +391,7 @@ function openDetail(item){
   document.getElementById('closeDetailBtn').addEventListener('click', closeModalRoot);
   document.getElementById('closeRequestBtn').addEventListener('click', async ()=>{
     const confirmId = prompt('To confirm closing, enter the request ID:');
-    if (!confirmId || confirmId !== item.id) { showToast('Cancelled or ID mismatch', {background: '#ef4444'}); return; }
+    if (!confirmId || confirmId !== item.id) { alert('Cancelled or ID mismatch'); return; }
     showToast('Closing request...');
     const res = await api.close(item.id);
     if (res && res.status === 'ok') {
@@ -414,12 +399,13 @@ function openDetail(item){
       closeModalRoot();
       await doSearch(); // refresh
     } else {
-      showToast('Failed closing: ' + (res?.message || 'error'), {auto:3000, background: '#ef4444'});
+      showToast('Failed closing: ' + (res?.message || 'error'), {auto:3000});
     }
   });
 }
 function closeModalRoot(){ const root = document.getElementById('modalRoot'); root.style.display='none'; root.innerHTML=''; }
 
+/* Add request modal */
 function openAddModal(){
   const root = document.getElementById('modalRoot');
   root.style.display = 'block';
@@ -433,3 +419,107 @@ function openAddModal(){
               <label for="rname">Your name</label>
               <input id="rname" name="name" type="text" required />
             </div>
+            <div class="form-group">
+              <label for="rtype">Request type</label>
+              <select id="rtype" name="type" required>
+                <option value="shipper">Shipper (I want to send)</option>
+                <option value="traveller">Traveller (I will carry)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="rfrom">From</label>
+              <input id="rfrom" name="from" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="rto">To</label>
+              <input id="rto" name="to" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="rdate">Pickup date</label>
+              <input id="rdate" name="datepickup" type="date" required />
+            </div>
+            <div class="form-group">
+              <label for="rprice">Price per kg (€) — optional</label>
+              <input id="rprice" name="price_per_kg" type="number" step="0.01" min="0" placeholder="e.g. 4.50" />
+            </div>
+            <div class="form-group">
+              <label for="rmobile">Mobile (optional)</label>
+              <input id="rmobile" name="mobile" type="tel" />
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label for="remail">Email (optional)</label>
+              <input id="remail" name="email" type="email" />
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label for="rnotes">Additional info (optional)</label>
+              <textarea id="rnotes" name="additionalinfo" placeholder="Any notes (fragile, size, pickup location, ... )"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" id="cancelAdd" class="btn ghost">Cancel</button>
+            <button type="submit" class="btn">Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  document.getElementById('cancelAdd').addEventListener('click', ()=>{ closeModalRoot(); });
+  document.getElementById('addForm').addEventListener('submit', handleAddSubmit);
+}
+
+/* submit add */
+async function handleAddSubmit(e){
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const obj = Object.fromEntries(f.entries());
+  
+  // if price empty -> null
+  if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
+  
+  showToast('Submitting...');
+  const res = await api.add(obj);
+  if (res && res.status === 'ok') {
+    showSuccessModal(res.id);
+    closeModalRoot();
+    await doSearch();
+  } else {
+    showToast('Submit failed: ' + (res?.message || 'network'), {auto:3500});
+  }
+}
+
+/* search */
+async function doSearch(){
+  const type = document.getElementById('searchType').value;
+  const from = document.getElementById('searchFrom').value;
+  const to = document.getElementById('searchTo').value;
+  const date = document.getElementById('searchDate').value;
+
+  showToast('Searching...', {auto:900});
+
+  const data = await api.list({
+    type,
+    from,
+    to,
+    datepickup: date
+  });
+
+  if (!Array.isArray(data)) {
+    showToast('Error loading results', {auto:3000});
+    document.getElementById('resultsRoot').innerHTML = '<div class="small-muted">Failed to load results.</div>';
+    return;
+  }
+
+  renderGrouped(data);
+}
+
+/* initial wiring */
+document.getElementById('openAdd').addEventListener('click', openAddModal);
+document.getElementById('doSearch').addEventListener('click', (e)=>{ e.preventDefault(); doSearch(); });
+
+/* initial load */
+doSearch();
+</script>
+
+</body>
+</html>
