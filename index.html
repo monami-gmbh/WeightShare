@@ -52,12 +52,69 @@
   .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:200;box-shadow:0 8px 24px rgba(2,6,23,0.18)}
   .success-modal .modal{max-width:520px;text-align:center}
   .copy-btn{background:#fff;color:var(--success);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:8px;cursor:pointer}
+  
+  /* --- MOBILE OPTIMIZATION START --- */
   @media (max-width:720px){
+    /* General Layout */
+    .container { padding: 15px; }
+    
+    /* Hero Section - Auto height to fit stacked search bar */
+    .hero { height: auto; padding: 25px 15px; text-align: center; }
+    .hero-title { font-size: 22px; line-height: 1.3; }
+    
+    /* Search Bar - Stacked */
+    .search-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+    .search-field { flex-direction: column; width: 100%; }
+    .input, .select, .date { width: 100%; box-sizing: border-box; height: 44px; } /* Bigger touch targets */
+    .search-btn { width: 100%; height: 44px; margin-top: 4px; }
+
+    /* Modals */
     .form-grid{grid-template-columns:1fr}
-    .search-bar{flex-direction:column;align-items:stretch}
-    .search-field{flex-direction:column}
-    .price{min-width:64px;text-align:right}
+    .modal { width: 90%; margin: 10px; max-height: 85vh; overflow-y: auto; }
+
+    /* Ticket Results - Card View */
+    .ticket { 
+      flex-direction: column; 
+      align-items: stretch; 
+      padding: 16px;
+      position: relative;
+    }
+    
+    /* Move Price to Top for visibility */
+    .price { 
+      order: -1; 
+      width: 100%; 
+      text-align: left; 
+      margin-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 8px;
+      color: var(--blue);
+      font-size: 18px;
+    }
+    
+    /* Ticket content wrapper */
+    .ticket-left { 
+      flex-direction: column; 
+      align-items: flex-start; 
+      width: 100%; 
+    }
+    .ticket-left > div:first-child { width: 100%; } /* Route text */
+    
+    /* WhatsApp Button - Full Width */
+    .ticket-left > div:last-child { 
+      margin-left: 0; 
+      width: 100%; 
+      margin-top: 12px; 
+    }
+    .whatsapp-btn { 
+      width: 100%; 
+      justify-content: center; 
+      padding: 12px;
+      font-size: 15px;
+    }
   }
+  /* --- MOBILE OPTIMIZATION END --- */
+
   /* icons */
   .wa-icon{width:18px;height:18px;display:inline-block}
 </style>
@@ -102,15 +159,11 @@
 <main class="container">
   <h3 class="section-title">Open Requests</h3>
   <div id="resultsRoot" aria-live="polite">
-    <!-- grouped lists will render here -->
-  </div>
+    </div>
 </main>
 
-<!-- modal root -->
 <div id="modalRoot" style="display:none"></div>
-<!-- success modal root -->
 <div id="successRoot" style="display:none"></div>
-<!-- toast -->
 <div id="toastRoot" style="position:fixed;top:0;left:0;right:0;pointer-events:none"></div>
 
 <script>
@@ -204,16 +257,13 @@ function showSuccessModal(id) {
 /* normalization for whatsapp */
 function cleanPhoneForWa(phone) {
   if (!phone) return '';
-  // remove spaces, parentheses, dashes, plus signs
   let p = phone.toString().trim();
   p = p.replace(/\s+/g,'');
   p = p.replace(/[^\d]/g,'');
-  // remove leading zeros (common local formats) - keep as is (wa expects country code)
-  // if number starts with single 0 and length > 6, leave as is; best to expect international format entered by user
   return p;
 }
 
-/* group by date (datepickup) - returns { 'YYYY-MM-DD': [items] } */
+/* group by date */
 function groupByDate(items){
   const map = {};
   items.forEach(it=>{
@@ -223,7 +273,6 @@ function groupByDate(items){
     if (!map[dp]) map[dp]=[];
     map[dp].push(it);
   });
-  // sort keys descending (nearest first)
   const sortedKeys = Object.keys(map).sort();
   const ordered = {};
   sortedKeys.forEach(k=>ordered[k]=map[k]);
@@ -250,7 +299,6 @@ function renderGrouped(list){
     group.forEach(item=>{
       const ticket = document.createElement('div');
       ticket.className = 'ticket';
-      // determine type from additionalinfo if saved as "Type: shipper" pattern
       let typeLabel = '';
       let notes = item.additionalinfo || '';
       if (typeof notes === 'string') {
@@ -278,10 +326,8 @@ function renderGrouped(list){
         </div>
         <div class="price">${price}</div>
       `;
-      // clicking the left opens details modal
       ticket.querySelector('.ticket-left').addEventListener('click', ()=>openDetail(item));
       ticket.querySelector('.ticket-left').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
-      // whatsapp button
       ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
         ev.stopPropagation();
         const wa = ev.currentTarget.dataset.wa || '';
@@ -306,11 +352,11 @@ function openDetail(item){
         <div style="display:flex;gap:12px;flex-wrap:wrap">
           <div style="flex:1">
             <p><strong>${item.name || '—'}</strong></p>
-            <p class="small-muted">Type: ${ (item.type || '—').match(/^Type:\\s*(shipper|traveller)/i) ? ( (item.additionalinfo||'').match(/^Type:\\s*(shipper|traveller)/i)[1] ) : '—' }</p>
+            <p class="small-muted">Type: ${ (item.type || '—').match(/^Type:\s*(shipper|traveller)/i) ? ( (item.additionalinfo||'').match(/^Type:\s*(shipper|traveller)/i)[1] ) : '—' }</p>
             <p class="small-muted">Date: ${item.datepickup || '—'}</p>
             <p class="small-muted">Phone: ${item.mobile || '—'}</p>
             <p class="small-muted">Email: ${item.email || '—'}</p>
-            <p style="margin-top:8px">${ (item.additionalinfo||'').replace(/^Type:\\s*(shipper|traveller)[:\\-\\s]*/i,'') || '' }</p>
+            <p style="margin-top:8px">${ (item.additionalinfo||'').replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,'') || '' }</p>
           </div>
           <div style="width:160px;text-align:right">
             <div style="font-size:14px;color:var(--muted)">Price</div>
@@ -411,33 +457,13 @@ async function handleAddSubmit(e){
   e.preventDefault();
   const f = new FormData(e.target);
   const obj = Object.fromEntries(f.entries());
-  // keep price field if provided
-  if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
-  // prepend type into additional info so we can persist type without DB change
-  /* submit add */
-async function handleAddSubmit(e){
-  e.preventDefault();
-  const f = new FormData(e.target);
-  const obj = Object.fromEntries(f.entries());
+  
   // if price empty -> null
   if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
-  // ensure type is sent separately (do NOT embed in additionalinfo)
-  // obj.type is already present because select name="type" in your form
+  
   showToast('Submitting...');
   const res = await api.add(obj);
   if (res && res.status === 'ok') {
-    showSuccessModal(res.id);
-    closeModalRoot();
-    await doSearch();
-  } else {
-    showToast('Submit failed: ' + (res?.message || 'network'), {auto:3500});
-  }
-}
-
-  showToast('Submitting...');
-  const res = await api.add(obj);
-  if (res && res.status === 'ok') {
-    // show success modal with id
     showSuccessModal(res.id);
     closeModalRoot();
     await doSearch();
@@ -459,7 +485,7 @@ async function doSearch(){
     type,
     from,
     to,
-    datepickup: date    // <-- FIXED!
+    datepickup: date
   });
 
   if (!Array.isArray(data)) {
