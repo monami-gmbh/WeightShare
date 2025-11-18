@@ -48,15 +48,17 @@
   input[type="text"], input[type="date"], input[type="tel"], input[type="email"], input[type="number"], select, textarea{padding:10px;border-radius:8px;border:1px solid #e6eef8;font-size:14px;background:#fff;outline:none}
   textarea{resize:vertical;min-height:80px}
   .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
-  .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:200;box-shadow:0 8px 24px rgba(2,6,23,0.18)}
+  /* place toast below header to avoid being hidden by sticky header */
+  .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:400;box-shadow:0 8px 24px rgba(2,6,23,0.18)}
   .success-modal .modal{max-width:520px;text-align:center}
   .copy-btn{background:#fff;color:var(--success);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:8px;cursor:pointer}
 
   /* --- Autocomplete Styles --- */
   .autocomplete-container { position: relative; width: 100%; }
-  .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-top: none; max-height: 200px; overflow-y: auto; z-index: 1000; }
-  .autocomplete-item { padding: 10px; cursor: pointer; }
-  .autocomplete-item:hover { background: #f0f0f0; }
+  .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-top: none; max-height: 220px; overflow-y: auto; z-index: 1000; box-shadow: 0 6px 18px rgba(2,6,23,0.08); }
+  .autocomplete-item { padding: 10px; cursor: pointer; font-size:14px; }
+  .autocomplete-item .muted { color: var(--muted); font-size:12px; display:block; margin-top:4px; }
+  .autocomplete-item:hover { background: #f0f6fb; }
   .hidden { display: none; }
 
   /* --- MOBILE OPTIMIZATION START --- */
@@ -106,18 +108,18 @@
 
       <div class="search-field" style="flex:1; display:flex; gap:8px; flex-wrap:wrap;">
         <div class="autocomplete-container" style="flex:1;">
-          <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or airport)" aria-label="From" />
-          <div id="acFromList" class="autocomplete-list hidden"></div>
+          <input id="searchFrom" class="input" type="text" placeholder="Leaving from (City or Country)" aria-label="From" />
+          <div id="acFromList" class="autocomplete-list hidden" role="listbox" aria-label="From suggestions"></div>
         </div>
         <div class="autocomplete-container" style="flex:1;">
-          <input id="searchTo" class="input" type="text" placeholder="Going to (city or airport)" aria-label="To" />
-          <div id="acToList" class="autocomplete-list hidden"></div>
+          <input id="searchTo" class="input" type="text" placeholder="Going to (City or Country)" aria-label="To" />
+          <div id="acToList" class="autocomplete-list hidden" role="listbox" aria-label="To suggestions"></div>
         </div>
         <input id="searchDate" class="date" type="date" placeholder="When" aria-label="Date" />
         <script>
           if (window.innerWidth <= 720) {
             const d = document.getElementById('searchDate');
-            d.type = 'text'; 
+            d.type = 'text';
             d.addEventListener('focus', function(){ this.type='date'; });
             d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
           }
@@ -137,105 +139,257 @@
 
 <div id="modalRoot" style="display:none"></div>
 <div id="successRoot" style="display:none"></div>
-<div id="toastRoot" style="position:fixed;top:0;left:0;right:0;pointer-events:none"></div>
+<div id="toastRoot" style="position:fixed;left:0;right:0;pointer-events:none"></div>
 
 <script>
-// Worker & API config
+/* =====================
+   API / Config
+   ===================== */
 const WORKER_URL = 'https://weightshare-backend.weightshare.workers.dev';
 const ADD_ROUTE = '/add-request';
 const LIST_ROUTE = '/list';
 const CLOSE_ROUTE = '/close-request';
 
-// --- Autocomplete ---
+/* =====================
+   Autocomplete helpers
+   - placed AFTER WORKER_URL so it can use it
+   ===================== */
+
+/**
+ * Call backend search-locations and return array of location objects:
+ * Each object expected from worker: { name, country_code, type, country_name }
+ */
 async function autoSearch(q) {
-  if (q.length < 2) return [];
+  if (!q || q.length < 2) return [];
   const url = `${WORKER_URL}/search-locations?q=${encodeURIComponent(q)}`;
   try {
     const r = await fetch(url);
     const data = await r.json();
-    return data?.items || [];
-  } catch { return []; }
+    // If backend returns plain array of objects, return it:
+    if (Array.isArray(data)) return data;
+    // If backend wraps results in { results: [...] } handle that
+    if (data?.results && Array.isArray(data.results)) return data.results;
+    return [];
+  } catch (e) {
+    return [];
+  }
 }
-function setupAutocomplete(inputId, listId){
-  const input=document.getElementById(inputId);
-  const list=document.getElementById(listId);
-  input.addEventListener("input", async ()=>{
-    const query=input.value.trim();
-    if(query.length<2){ list.classList.add("hidden"); return; }
-    const results = await autoSearch(query);
-    list.innerHTML="";
-    if(!results.length){ list.classList.add("hidden"); return; }
-    results.forEach(city=>{
-      const item=document.createElement("div");
-      item.className="autocomplete-item";
-      item.textContent=city;
-      item.onclick=()=>{ input.value=city; list.classList.add("hidden"); };
-      list.appendChild(item);
-    });
-    list.classList.remove("hidden");
-  });
-  document.addEventListener("click",(e)=>{ if(!list.contains(e.target)&&e.target!==input){ list.classList.add("hidden"); } });
-}
-setupAutocomplete("searchFrom","acFromList");
-setupAutocomplete("searchTo","acToList");
 
-// --- API helpers ---
-const api={
-  async list(q={}) {
+/**
+ * Render suggestions into list and attach metadata to input when selected.
+ * inputId: DOM id of input (e.g. "searchFrom")
+ * listId: DOM id of list container (e.g. "acFromList")
+ */
+function setupAutocomplete(inputId, listId) {
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  let focusedIndex = -1;
+  let currentItems = [];
+
+  function clearList() {
+    list.innerHTML = '';
+    list.classList.add('hidden');
+    focusedIndex = -1;
+    currentItems = [];
+  }
+
+  input.addEventListener('input', async () => {
+    const q = input.value.trim();
+    input.removeAttribute('data-country');
+    input.removeAttribute('data-type');
+
+    if (q.length < 2) { clearList(); return; }
+
+    const results = await autoSearch(q);
+    list.innerHTML = '';
+    currentItems = results || [];
+
+    if (!currentItems.length) { clearList(); return; }
+
+    currentItems.forEach((it, idx) => {
+      // 'it' might be a string or an object; normalize:
+      const name = typeof it === 'string' ? it : (it.name || '');
+      const country = (it && (it.country_name || it.country_code)) ? (it.country_name || it.country_code) : '';
+      const type = (it && it.type) ? it.type : '';
+
+      const div = document.createElement('div');
+      div.className = 'autocomplete-item';
+      div.setAttribute('role','option');
+      div.dataset.index = idx;
+      div.innerHTML = `<strong>${escapeHtml(name)}</strong>${country ? ` <span class="muted">${escapeHtml(country)}</span>` : ''}${type ? ` <span class="muted">(${escapeHtml(type)})</span>` : ''}`;
+      div.addEventListener('click', () => {
+        // Put only the human-friendly name into input
+        input.value = name;
+        // Save metadata on the input for later when performing search/add
+        if (it && it.country_code) input.dataset.country = it.country_code;
+        else if (it && it.country_name) input.dataset.country = it.country_name;
+        if (type) input.dataset.type = type;
+        clearList();
+        input.focus();
+      });
+      list.appendChild(div);
+    });
+
+    list.classList.remove('hidden');
+  });
+
+  // keyboard navigation (Up/Down/Enter/Escape)
+  input.addEventListener('keydown', (ev) => {
+    if (list.classList.contains('hidden')) return;
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (!items.length) return;
+    if (ev.key === 'ArrowDown') {
+      ev.preventDefault();
+      focusedIndex = Math.min(focusedIndex + 1, items.length - 1);
+      highlight(items, focusedIndex);
+    } else if (ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      focusedIndex = Math.max(focusedIndex - 1, 0);
+      highlight(items, focusedIndex);
+    } else if (ev.key === 'Enter') {
+      ev.preventDefault();
+      if (focusedIndex >= 0 && items[focusedIndex]) items[focusedIndex].click();
+    } else if (ev.key === 'Escape') {
+      clearList();
+    }
+  });
+
+  function highlight(nodes, idx) {
+    nodes.forEach(n => n.classList.remove('focused'));
+    if (nodes[idx]) {
+      nodes[idx].classList.add('focused');
+      nodes[idx].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  // close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!list.contains(e.target) && e.target !== input) {
+      clearList();
+    }
+  });
+}
+
+/* activate autocompletes for search fields */
+setupAutocomplete('searchFrom','acFromList');
+setupAutocomplete('searchTo','acToList');
+
+/* =====================
+   API helpers
+   ===================== */
+const api = {
+  async list(q = {}) {
     const params = new URLSearchParams();
-    if(q.from) params.set('from',q.from);
-    if(q.to) params.set('to',q.to);
-    if(q.datepickup) params.set('datepickup',q.datepickup);
-    if(q.type) params.set('type',q.type);
-    const url=WORKER_URL+LIST_ROUTE+(params.toString()?('?'+params.toString()):'');
-    try{ const r=await fetch(url); return await r.json(); } catch(e){ return {status:'error', message:String(e)}; }
+    if (q.from) params.set('from', q.from);
+    if (q.to) params.set('to', q.to);
+    if (q.datepickup) params.set('datepickup', q.datepickup);
+    if (q.type) params.set('type', q.type);
+    // include country/type metadata if provided
+    if (q.from_country) params.set('from_country', q.from_country);
+    if (q.from_type) params.set('from_type', q.from_type);
+    if (q.to_country) params.set('to_country', q.to_country);
+    if (q.to_type) params.set('to_type', q.to_type);
+
+    const url = WORKER_URL + LIST_ROUTE + (params.toString() ? ('?' + params.toString()) : '');
+    try {
+      const r = await fetch(url);
+      return await r.json();
+    } catch (e) {
+      return { status: 'error', message: String(e) };
+    }
   },
   async add(payload) {
-    try{ const r=await fetch(WORKER_URL+ADD_ROUTE,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}); return await r.json(); } 
-    catch(e){ return {status:'error', message:String(e)}; }
+    try {
+      const r = await fetch(WORKER_URL + ADD_ROUTE, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      return await r.json();
+    } catch (e) {
+      return { status:'error', message:String(e) };
+    }
   },
-  async close(id){
-    try{ const r=await fetch(WORKER_URL+CLOSE_ROUTE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); return await r.json(); }
-    catch(e){ return {status:'error', message:String(e)}; }
+  async close(id) {
+    try {
+      const r = await fetch(WORKER_URL + CLOSE_ROUTE, {
+        method: 'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ id })
+      });
+      return await r.json();
+    } catch (e) {
+      return { status:'error', message:String(e) };
+    }
   }
 };
 
-// --- UI helpers ---
-function showToast(text,{auto=2200}={}){ const root=document.getElementById('toastRoot'); root.innerHTML=`<div class="toast">${text}</div>`; if(auto>0)setTimeout(()=>root.innerHTML='',auto); }
-function cleanPhoneForWa(phone){ if(!phone) return ''; let p=phone.toString().trim(); p=p.replace(/\s+/g,'').replace(/[^\d]/g,''); return p; }
+/* =====================
+   UI helpers & render
+   ===================== */
+function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" })[m]); }
+function showToast(text, {auto=2200} = {}) {
+  const root = document.getElementById('toastRoot');
+  root.innerHTML = `<div class="toast">${escapeHtml(text)}</div>`;
+  if (auto > 0) setTimeout(()=>root.innerHTML = '', auto);
+}
 
-// --- Rendering ---
+/* phone */
+function cleanPhoneForWa(phone) {
+  if (!phone) return '';
+  let p = phone.toString().trim();
+  p = p.replace(/\s+/g,'').replace(/[^\d]/g,'');
+  return p;
+}
+
+/* grouping & rendering (unchanged logic) */
 function groupByDate(items){
-  const map={};
+  const map = {};
   items.forEach(it=>{
-    const dp=it.datepickup||it.datepickup_clean? new Date(it.datepickup||it.datepickup_clean).toISOString().slice(0,10) : 'no-date';
-    if(!map[dp]) map[dp]=[];
+    const dp = it.datepickup || it.datepickup_clean ? new Date(it.datepickup || it.datepickup_clean).toISOString().slice(0,10) : 'no-date';
+    if (!map[dp]) map[dp]=[];
     map[dp].push(it);
   });
-  const sortedKeys=Object.keys(map).sort();
-  const ordered={};
+  const sortedKeys = Object.keys(map).sort();
+  const ordered = {};
   sortedKeys.forEach(k=>ordered[k]=map[k]);
   return ordered;
 }
+
 function renderGrouped(list){
-  const root=document.getElementById('resultsRoot');
-  root.innerHTML='';
-  if(!Array.isArray(list)||list.length===0){ root.innerHTML='<div class="small-muted">No open requests found.</div>'; return; }
-  const grouped=groupByDate(list);
+  const root = document.getElementById('resultsRoot');
+  root.innerHTML = '';
+  if (!Array.isArray(list) || list.length === 0) {
+    root.innerHTML = '<div class="small-muted">No open requests found.</div>';
+    return;
+  }
+  const grouped = groupByDate(list);
   Object.keys(grouped).forEach(dateKey=>{
-    const group=grouped[dateKey];
-    const h=document.createElement('div'); h.className='date-group';
-    const pretty=dateKey==='no-date'?'No date':(new Date(dateKey)).toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'short'});
-    h.innerHTML=`<div class="date-header">${pretty}</div>`; root.appendChild(h);
+    const group = grouped[dateKey];
+    const h = document.createElement('div'); h.className = 'date-group';
+    const pretty = dateKey==='no-date' ? 'No date' : (new Date(dateKey)).toLocaleDateString(undefined, { weekday:'long', day:'numeric', month:'short' });
+    h.innerHTML = `<div class="date-header">${pretty}</div>`;
+    root.appendChild(h);
+
     group.forEach(item=>{
-      const ticket=document.createElement('div'); ticket.className='ticket';
-      let typeLabel=''; let notes=item.additionalinfo||''; if(typeof notes==='string'){ const m=notes.match(/^Type:\s*(shipper|traveller)\b[:\-\s]*/i); if(m){ typeLabel=m[1].toLowerCase(); notes=notes.replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''); } }
-      const from=item.from_loc||item.from||''; const to=item.to_loc||item.to||''; const name=item.name||'—'; const mobile=item.mobile||''; const price=(item.price_per_kg!==undefined&&item.price_per_kg!==null&&item.price_per_kg!=='')?`${item.price_per_kg} €/kg`:'VB'; const cleanMobile=cleanPhoneForWa(mobile);
-      ticket.innerHTML=`
-        <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${name}">
+      const ticket = document.createElement('div'); ticket.className = 'ticket';
+      let typeLabel = ''; let notes = item.additionalinfo || '';
+      if (typeof notes === 'string') {
+        const m = notes.match(/^Type:\s*(shipper|traveller)\b[:\-\s]*/i);
+        if (m){ typeLabel = m[1].toLowerCase(); notes = notes.replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''); }
+      }
+      const from = item.from_loc || item.from || '';
+      const to = item.to_loc || item.to || '';
+      const name = item.name || '—';
+      const mobile = item.mobile || '';
+      const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
+      const cleanMobile = cleanPhoneForWa(mobile);
+
+      ticket.innerHTML = `
+        <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
           <div style="min-width:0">
-            <div class="route">${from} → ${to} ${typeLabel?`<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${typeLabel}</small>`:''}</div>
-            <div class="meta">${name} • <span class="small-muted">${mobile||''}</span></div>
+            <div class="route">${escapeHtml(from)} → ${escapeHtml(to)} ${typeLabel ? `<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${escapeHtml(typeLabel)}</small>` : ''}</div>
+            <div class="meta">${escapeHtml(name)} • <span class="small-muted">${escapeHtml(mobile || '')}</span></div>
           </div>
           <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
             <button class="whatsapp-btn" data-wa="${cleanMobile}" title="Contact on WhatsApp">
@@ -244,24 +398,80 @@ function renderGrouped(list){
             </button>
           </div>
         </div>
-        <div class="price">${price}</div>
+        <div class="price">${escapeHtml(price)}</div>
       `;
-      ticket.querySelector('.ticket-left').addEventListener('click',()=>openDetail(item));
-      ticket.querySelector('.ticket-left').addEventListener('keydown',(e)=>{if(e.key==='Enter')openDetail(item);});
-      ticket.querySelector('.whatsapp-btn').addEventListener('click',(ev)=>{
+
+      ticket.querySelector('.ticket-left').addEventListener('click', ()=>openDetail(item));
+      ticket.querySelector('.ticket-left').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
+      ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
         ev.stopPropagation();
-        const wa=ev.currentTarget.dataset.wa||'';
-        if(!wa){ showToast('No phone number'); return; }
-        window.open('https://wa.me/'+wa,'_blank');
+        const wa = ev.currentTarget.dataset.wa || '';
+        if (!wa) { showToast('No phone number'); return; }
+        window.open('https://wa.me/' + wa, '_blank');
       });
-      root.appendChild(ticket);
+
+      // append
+      document.getElementById('resultsRoot').appendChild(ticket);
     });
   });
 }
 
-// --- Modals and Add ---
+/* =====================
+   Detail modal & close
+   ===================== */
+function openDetail(item){
+  const root = document.getElementById('modalRoot');
+  root.style.display = 'block';
+  const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
+  const created = item.createdat ? new Date(item.createdat).toLocaleString() : '';
+  root.innerHTML = `
+    <div class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal">
+        <h3 style="margin-top:0">${escapeHtml(item.from_loc || item.from || '')} → ${escapeHtml(item.to_loc || item.to || '')}</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1">
+            <p><strong>${escapeHtml(item.name || '—')}</strong></p>
+            <p class="small-muted">Type: ${escapeHtml((item.type || '—'))}</p>
+            <p class="small-muted">Date: ${escapeHtml(item.datepickup || '—')}</p>
+            <p class="small-muted">Phone: ${escapeHtml(item.mobile || '—')}</p>
+            <p class="small-muted">Email: ${escapeHtml(item.email || '—')}</p>
+            <p style="margin-top:8px">${escapeHtml((item.additionalinfo||'').replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''))}</p>
+          </div>
+          <div style="width:160px;text-align:right">
+            <div style="font-size:14px;color:var(--muted)">Price</div>
+            <div style="font-weight:800;font-size:18px">${escapeHtml(price)}</div>
+            <div style="margin-top:14px;color:var(--muted);font-size:12px">${escapeHtml(created)}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+          <button id="closeDetailBtn" class="btn ghost">Close</button>
+          <button id="closeRequestBtn" class="btn" style="background:#ef4444">Close Request</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('closeDetailBtn').addEventListener('click', closeModalRoot);
+  document.getElementById('closeRequestBtn').addEventListener('click', async ()=>{
+    const confirmId = prompt('To confirm closing, enter the request ID:');
+    if (!confirmId || confirmId !== item.id) { alert('Cancelled or ID mismatch'); return; }
+    showToast('Closing request...');
+    const res = await api.close(item.id);
+    if (res && res.status === 'ok') {
+      showToast('Request closed', {auto:1800});
+      closeModalRoot();
+      await doSearch(); // refresh
+    } else {
+      showToast('Failed closing: ' + (res?.message || 'error'), {auto:3000});
+    }
+  });
+}
 function closeModalRoot(){ const root=document.getElementById('modalRoot'); root.style.display='none'; root.innerHTML=''; }
 
+/* =====================
+   Add request modal
+   - we will attempt to auto-resolve country/type when user doesn't pick suggestion
+   ===================== */
 function showSuccessModal(id){
   const root=document.getElementById('successRoot'); root.style.display='block';
   root.innerHTML=`
@@ -270,7 +480,7 @@ function showSuccessModal(id){
         <h3 style="margin-top:0;color:var(--success)">✔ Request created</h3>
         <p style="margin:8px 0 14px">Your request was submitted successfully. Save this ID to close the request later.</p>
         <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:12px">
-          <div style="background:#fff;padding:10px 14px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04)">${id}</div>
+          <div style="background:#fff;padding:10px 14px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04)">${escapeHtml(id)}</div>
           <button id="copyId" class="copy-btn">Copy ID</button>
         </div>
         <div style="display:flex;justify-content:center;gap:8px">
@@ -293,8 +503,22 @@ function openAddModal(){
           <div class="form-grid">
             <div class="form-group"><label for="rname">Your name</label><input id="rname" name="name" type="text" required /></div>
             <div class="form-group"><label for="rtype">Request type</label><select id="rtype" name="type" required><option value="shipper">Shipper (I want to send)</option><option value="traveller">Traveller (I will carry)</option></select></div>
-            <div class="form-group"><label for="rfrom">From</label><input id="rfrom" name="from" type="text" required /></div>
-            <div class="form-group"><label for="rto">To</label><input id="rto" name="to" type="text" required /></div>
+
+            <!-- From/To fields: we also attach small autocomplete lists here -->
+            <div class="form-group"><label for="rfrom">From</label>
+              <div style="position:relative">
+                <input id="rfrom" name="from" type="text" required />
+                <div id="acRFrom" class="autocomplete-list hidden" style="position:absolute;left:0;right:0;top:100%;z-index:1200"></div>
+              </div>
+            </div>
+
+            <div class="form-group"><label for="rto">To</label>
+              <div style="position:relative">
+                <input id="rto" name="to" type="text" required />
+                <div id="acRTo" class="autocomplete-list hidden" style="position:absolute;left:0;right:0;top:100%;z-index:1200"></div>
+              </div>
+            </div>
+
             <div class="form-group"><label for="rdate">Pickup date</label><input id="rdate" name="datepickup" type="date" required /></div>
             <div class="form-group"><label for="rprice">Price per kg (€) — optional</label><input id="rprice" name="price_per_kg" type="number" step="0.01" min="0" placeholder="e.g. 4.50" /></div>
             <div class="form-group"><label for="rmobile">Mobile (optional)</label><input id="rmobile" name="mobile" type="tel" /></div>
@@ -309,35 +533,161 @@ function openAddModal(){
       </div>
     </div>
   `;
+
+  // attach small autocomplete logic for rfrom / rto using same helper but custom IDs
+  setupSmallInlineAutocomplete('rfrom','acRFrom');
+  setupSmallInlineAutocomplete('rto','acRTo');
+
   document.getElementById('cancelAdd').addEventListener('click',closeModalRoot);
-  document.getElementById('addForm').addEventListener('submit',async e=>{
-    e.preventDefault();
-    const obj=Object.fromEntries(new FormData(e.target).entries());
-    if(!obj.price_per_kg||obj.price_per_kg==='') obj.price_per_kg=null;
-    showToast('Submitting...');
-    const res=await api.add(obj);
-    if(res&&res.status==='ok'){ showSuccessModal(res.id); closeModalRoot(); await doSearch(); } 
-    else showToast('Submit failed: '+(res?.message||'network'),{auto:3500});
-  });
+  document.getElementById('addForm').addEventListener('submit', handleAddSubmit);
 }
 
-document.getElementById('openAdd').addEventListener('click',openAddModal);
+/* small inline autocomplete used inside modal (faster logic) */
+function setupSmallInlineAutocomplete(inputId, listId) {
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  let currentItems = [];
 
-// --- Search ---
+  function clearList(){ list.innerHTML=''; list.classList.add('hidden'); currentItems=[]; }
+
+  input.addEventListener('input', async () => {
+    const q = input.value.trim();
+    input.removeAttribute('data-country'); input.removeAttribute('data-type');
+    if (q.length < 2) { clearList(); return; }
+    const results = await autoSearch(q);
+    list.innerHTML=''; currentItems = results || [];
+    if (!currentItems.length) { clearList(); return; }
+    currentItems.forEach((it, idx) => {
+      const name = typeof it === 'string' ? it : (it.name || '');
+      const country = (it && (it.country_name || it.country_code)) ? (it.country_name || it.country_code) : '';
+      const type = (it && it.type) ? it.type : '';
+      const div=document.createElement('div'); div.className='autocomplete-item';
+      div.innerHTML = `<strong>${escapeHtml(name)}</strong>${country ? ` <span class="muted">${escapeHtml(country)}</span>` : ''}${type?` <span class="muted">(${escapeHtml(type)})</span>` : ''}`;
+      div.addEventListener('click', () => {
+        input.value = name;
+        if (it && it.country_code) input.dataset.country = it.country_code;
+        else if (it && it.country_name) input.dataset.country = it.country_name;
+        if (type) input.dataset.type = type;
+        clearList();
+      });
+      list.appendChild(div);
+    });
+    list.classList.remove('hidden');
+  });
+
+  document.addEventListener('click', (e)=>{ if (!list.contains(e.target) && e.target !== input) clearList(); });
+}
+
+/* handle add submit:
+   - ensure we include country/type metadata
+   - if user didn't pick suggestion, attempt to resolve with autoSearch(query) and pick first match
+*/
+async function handleAddSubmit(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const obj = Object.fromEntries(f.entries());
+
+  // Ensure price null when omitted
+  if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
+
+  // try to attach country/type metadata: rfrom/rto inputs have dataset values if user clicked suggestion
+  const rfromEl = document.getElementById('rfrom');
+  const rtoEl = document.getElementById('rto');
+
+  if (rfromEl?.dataset?.country) { obj.from_country = rfromEl.dataset.country; obj.from_type = rfromEl.dataset.type || 'city'; }
+  if (rtoEl?.dataset?.country) { obj.to_country = rtoEl.dataset.country; obj.to_type = rtoEl.dataset.type || 'city'; }
+
+  // if missing metadata, try to resolve automatically (best-effort)
+  if ((!obj.from_country || !obj.from_type) && obj.from) {
+    const res = await autoSearch(obj.from.trim());
+    if (res && res.length) {
+      const best = res[0];
+      obj.from_country = best.country_code || best.country_name || obj.from_country || '';
+      obj.from_type = best.type || obj.from_type || 'city';
+    }
+  }
+  if ((!obj.to_country || !obj.to_type) && obj.to) {
+    const res = await autoSearch(obj.to.trim());
+    if (res && res.length) {
+      const best = res[0];
+      obj.to_country = best.country_code || best.country_name || obj.to_country || '';
+      obj.to_type = best.type || obj.to_type || 'city';
+    }
+  }
+
+  // validate required fields as backend expects
+  const missing = [];
+  if (!obj.name) missing.push('name');
+  if (!obj.from) missing.push('from');
+  if (!obj.to) missing.push('to');
+  if (!obj.datepickup) missing.push('datepickup');
+  if (!obj.type) missing.push('type');
+  if (!obj.from_country || !obj.to_country || !obj.from_type || !obj.to_type) {
+    // If still missing location metadata inform the user clearly rather than letting backend error
+    showToast('Please select a location from the suggestions for both From and To (or enter a clear country).');
+    return;
+  }
+
+  showToast('Submitting...');
+  const res = await api.add(obj);
+  if (res && res.status === 'ok') {
+    showSuccessModal(res.id);
+    closeModalRoot();
+    await doSearch();
+  } else {
+    // show backend error in toast (visible below header)
+    showToast('Submit failed: ' + (res?.message || 'network'), { auto: 6000 });
+  }
+}
+
+/* =====================
+   Search (uses dataset metadata when available)
+   - if metadata missing it will try to resolve first
+   ===================== */
 async function doSearch(){
-  const type=document.getElementById('searchType').value;
-  const from=document.getElementById('searchFrom').value;
-  const to=document.getElementById('searchTo').value;
-  const date=document.getElementById('searchDate').value;
-  showToast('Searching...',{auto:900});
-  const data=await api.list({type,from,to,datepickup:date});
-  if(!Array.isArray(data)){ showToast('Error loading results',{auto:3000}); document.getElementById('resultsRoot').innerHTML='<div class="small-muted">Failed to load results.</div>'; return; }
+  const type = document.getElementById('searchType').value;
+  const fromInput = document.getElementById('searchFrom');
+  const toInput = document.getElementById('searchTo');
+  const date = document.getElementById('searchDate').value;
+
+  // Read visible values
+  const from = fromInput.value.trim();
+  const to = toInput.value.trim();
+
+  // Prepare query object to send to API
+  const q = { type, from, to, datepickup: date };
+
+  // Attach metadata if user selected suggestion
+  if (fromInput?.dataset?.country) { q.from_country = fromInput.dataset.country; q.from_type = fromInput.dataset.type || 'city'; }
+  if (toInput?.dataset?.country) { q.to_country = toInput.dataset.country; q.to_type = toInput.dataset.type || 'city'; }
+
+  // If metadata missing but user typed something, attempt a one-shot resolution
+  if (!q.from_country && from) {
+    const r = await autoSearch(from);
+    if (r && r.length) { q.from_country = r[0].country_code || r[0].country_name || ''; q.from_type = r[0].type || 'city'; }
+  }
+  if (!q.to_country && to) {
+    const r = await autoSearch(to);
+    if (r && r.length) { q.to_country = r[0].country_code || r[0].country_name || ''; q.to_type = r[0].type || 'city'; }
+  }
+
+  showToast('Searching...', { auto: 900 });
+  const data = await api.list(q);
+  if (!Array.isArray(data)) {
+    showToast('Error loading results', { auto: 3000 });
+    document.getElementById('resultsRoot').innerHTML = '<div class="small-muted">Failed to load results.</div>';
+    return;
+  }
   renderGrouped(data);
 }
-document.getElementById('doSearch').addEventListener('click',e=>{ e.preventDefault(); doSearch(); });
 
-// Initial load
+/* initial wiring */
+document.getElementById('openAdd').addEventListener('click', openAddModal);
+document.getElementById('doSearch').addEventListener('click', (e)=>{ e.preventDefault(); doSearch(); });
+
+/* initial load */
 doSearch();
+
 </script>
 
 </body>
