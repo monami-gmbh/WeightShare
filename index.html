@@ -1,769 +1,275 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WeightShare - Send or transport parcels with travellers</title>
-  <style>
-    :root {
-      --bg: #f8fafc;
-      --dark: #0b1220;
-      --muted: #6b7280;
-      --border: #e6eef8;
-      --light-border: #f1f5f9;
-      --blue: #2563eb;
-      --green: #22c55e;
-      --success: #16a34a;
-      --error: #ef4444;
-    }
-    body {
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-      margin: 0;
-      background-color: var(--bg);
-      color: var(--dark);
-      line-height: 1.5;
-    }
-    input, button, select, textarea {
-      font-family: inherit;
-      font-size: 100%;
-      margin: 0;
-      line-height: inherit;
-    }
-    a {
-      color: var(--blue);
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
+// worker.ts - Final version with location search, hierarchical matching, and updated add/list endpoints.
 
-    /* Layout Containers */
-    .container {
-      max-width: 900px; /* Adjusted to fit your overall layout */
-      margin-left: auto;
-      margin-right: auto;
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
+export default {
+    async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+        const db = env.DB;
+        const url = new URL(request.url);
+        const pathname = url.pathname.replace(/\/$/, ""); // Normalize pathname by removing trailing slash
+        const method = request.method.toUpperCase();
 
-    /* Header */
-    header {
-      background-color: #fff;
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 0; /* Adjusted for container padding */
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-    .nav-wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo {
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: var(--dark);
-      text-decoration: none;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.5rem 1rem;
-      font-weight: 600;
-      font-size: 0.875rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      background-color: var(--blue);
-      color: #fff;
-      border: 1px solid var(--blue);
-      transition: all 0.15s ease-in-out;
-    }
-    .btn:hover {
-      background-color: #1e40af; /* Darker blue */
-      border-color: #1e40af;
-      text-decoration: none;
-    }
-    .btn.ghost {
-      background-color: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .btn.ghost:hover {
-      background-color: var(--light-border);
-      color: var(--dark);
-    }
+        const CORS_HEADERS = {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        };
 
-    /* Hero Section */
-    .hero {
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1572911475739-165c71a37c4e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center center / cover no-repeat;
-      color: #fff;
-      padding: 4rem 1.5rem 6rem; /* Increased bottom padding to accommodate search bar */
-      text-align: center;
-      min-height: 250px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    .hero-title {
-      font-size: 2.25rem;
-      font-weight: 800;
-      margin-bottom: 2rem;
-      max-width: 600px;
-      line-height: 1.2;
-    }
-    .search-bar {
-      display: flex; /* Use flexbox for layout */
-      background-color: #fff;
-      border-radius: 0.75rem;
-      padding: 0.75rem;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-      gap: 0.5rem;
-      max-width: 900px; /* Matches container max-width */
-      width: 100%;
-      margin-top: -80px; /* Pulls it up into the hero section */
-      position: relative;
-      z-index: 10;
-    }
-    .search-bar .search-field {
-      display: flex; /* For inner fields like from/to/date */
-      flex: 1; /* Allows it to grow and shrink */
-      gap: 0.5rem;
-      align-items: center;
-      min-width: 0; /* Allows flex items to shrink */
-    }
-    .search-bar .input,
-    .search-bar .select,
-    .search-bar .date {
-      padding: 0.625rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      outline: none;
-      transition: all 0.15s ease-in-out;
-      width: 100%; /* Important for inputs inside wrapper */
-      box-sizing: border-box; /* Include padding and border in width */
-    }
-    .search-bar .input:focus,
-    .search-bar .select:focus,
-    .search-bar .date:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-    }
-    .search-bar .date {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      position: relative;
-    }
-    .search-bar .date::-webkit-calendar-picker-indicator {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      color: transparent;
-      cursor: pointer;
-    }
-    .search-bar .date::-webkit-datetime-edit { display: inline-block; padding: 0; }
-    .search-bar .date::placeholder { color: var(--muted); }
-    
-    .search-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.625rem 1rem;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      background-color: var(--blue);
-      color: #fff;
-      border: 1px solid var(--blue);
-      transition: all 0.15s ease-in-out;
-      white-space: nowrap;
-    }
-    .search-btn:hover {
-      background-color: #1e40af; /* Darker blue */
-      border-color: #1e40af;
-    }
+        if (method === "OPTIONS") {
+            return new Response(null, { status: 204, headers: CORS_HEADERS });
+        }
 
-    /* Autocomplete specific styles */
-    .autocomplete-wrapper {
-      position: relative; /* CRITICAL: Establishes positioning context for children */
-      flex: 1; /* Allows it to grow in a flex context, e.g., inside search-field */
-      min-width: 0; /* Allows it to shrink in flex containers */
-    }
-    .suggestions-list {
-      position: absolute; /* CRITICAL: Makes it float over other content */
-      top: 100%; /* Position right below the input */
-      left: 0;
-      right: 0;
-      background-color: #fff;
-      border: 1px solid var(--border);
-      border-top: none; /* Makes it look like it's connected to the input */
-      border-radius: 0 0 8px 8px;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      box-shadow: 0 4px 10px rgba(2,6,23,0.06);
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 100; /* Ensure it's above other elements like modals or other form fields */
-      display: none; /* Hidden by default */
-    }
-    .suggestions-list li {
-      padding: 10px 12px;
-      cursor: pointer;
-      font-size: 14px;
-      color: var(--dark);
-      display: flex; /* Make li a flex container */
-      justify-content: space-between; /* Space out name and country_name */
-      align-items: center;
-    }
-    .suggestions-list li:hover,
-    .suggestions-list li.active { /* 'active' class for keyboard navigation */
-      background-color: var(--blue);
-      color: #fff;
-    }
-    .suggestions-list li.active .muted-text {
-      color: rgba(255,255,255,0.7); /* Muted text in active state */
-    }
-    .suggestions-list li .muted-text {
-      color: var(--muted);
-      font-size: 12px;
-      margin-left: 8px;
-      flex-shrink: 0; /* Prevent it from shrinking too much */
-    }
+        const jsonResponse = (obj: any, status: number = 200): Response =>
+            new Response(JSON.stringify(obj), {
+                status,
+                headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+            });
 
-    /* Main content area */
-    main.container {
-      padding-top: 2rem;
-      padding-bottom: 2rem;
-    }
-    .section-title {
-      font-weight: 700;
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      color: var(--dark);
-    }
-    .date-group {
-      margin-bottom: 1.5rem;
-    }
-    .date-header {
-      font-weight: 700;
-      font-size: 1.125rem;
-      margin-bottom: 1rem;
-      color: var(--dark);
-    }
-    .ticket {
-      background-color: #fff;
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1rem 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-    }
-    .ticket-left {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      flex: 1;
-      min-width: 0;
-      cursor: pointer;
-      padding-right: 1rem; /* Space for price */
-    }
-    .ticket-left:focus {
-      outline: 2px solid var(--blue);
-      outline-offset: 2px;
-      border-radius: 0.75rem;
-    }
-    .ticket-left .route {
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--dark);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .ticket-left .meta {
-      font-size: 0.875rem;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .price {
-      font-weight: 700;
-      font-size: 1.125rem;
-      color: var(--dark);
-      margin-left: 1rem;
-      white-space: nowrap;
-    }
-    .whatsapp-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      background-color: var(--green);
-      color: #fff;
-      border: none;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.15s ease-in-out;
-      white-space: nowrap;
-    }
-    .whatsapp-btn:hover {
-      background-color: #16a34a; /* Darker green */
-    }
-    .wa-icon {
-      width: 18px;
-      height: 18px;
-    }
-    .small-muted {
-      font-size: 0.875rem;
-      color: var(--muted);
-    }
-
-    /* Modals */
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0,0,0,0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      animation: fade-in 0.2s ease-out;
-    }
-    .modal {
-      background-color: #fff;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05);
-      max-width: 500px;
-      width: 90%;
-      animation: zoom-in 0.2s ease-out;
-      position: relative;
-      z-index: 1001;
-    }
-    .modal h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      position: relative; /* CRITICAL for autocomplete in modal: Establishes positioning context */
-    }
-    .form-group label {
-      font-weight: 600;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-      color: var(--dark);
-    }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      outline: none;
-      transition: all 0.15s ease-in-out;
-      box-sizing: border-box; /* Crucial for consistent sizing */
-      width: 100%; /* Ensure they take full width of their grid cell */
-    }
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-    }
-    .form-group textarea {
-      min-height: 80px;
-      resize: vertical;
-    }
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-    }
-
-    /* Toast Messages */
-    .toast-root {
-      position: fixed;
-      bottom: 20px; /* Moved to bottom for better UX */
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: center; /* Center toasts horizontally */
-    }
-    .toast {
-      background-color: var(--success);
-      color: #fff;
-      padding: 10px 15px;
-      border-radius: 8px;
-      font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      animation: slide-up 0.3s ease-out;
-      width: fit-content; /* Only take content width */
-      max-width: 90vw; /* Prevent from being too wide on small screens */
-    }
-    .toast.error {
-      background-color: var(--error);
-    }
-
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes zoom-in {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    @keyframes slide-up {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 1.75rem;
-      }
-      .search-bar {
-        flex-direction: column;
-        margin-top: -60px;
-        padding: 0.75rem; /* Ensure consistent padding */
-      }
-      .search-bar .search-field {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-      }
-      .search-bar .search-field > *:not(.autocomplete-wrapper):not(.search-btn) {
-          width: 100%;
-      }
-      .autocomplete-wrapper {
-          width: 100%; /* Ensure autocomplete wrappers take full width */
-      }
-      .search-bar .select,
-      .search-bar .input,
-      .search-bar .date,
-      .search-bar .search-btn {
-          width: 100%;
-      }
-
-      .modal {
-        width: 95%;
-        padding: 1.5rem;
-      }
-      .form-grid {
-        grid-template-columns: 1fr; /* Single column on small screens */
-      }
-      .form-group {
-        width: 100%;
-      }
-      .ticket {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 1rem;
-      }
-      .ticket-left {
-        width: 100%;
-        padding-right: 0;
-        justify-content: space-between;
-      }
-      .ticket-left > div:first-child {
-        min-width: unset;
-        flex-grow: 1;
-        overflow: hidden;
-      }
-      .ticket-left > div:last-child {
-        flex-shrink: 0;
-      }
-      .price {
-        margin-left: 0;
-        width: 100%;
-        text-align: right;
-      }
-      header .container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-      }
-      main.container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="container nav-wrap">
-      <div class="logo">WeightShare</div>
-      <div class="nav-actions">
-        <button id="openAdd" class="btn">➕ Add Request</button>
-      </div>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="hero-inner container">
-      <div class="hero-title">Send or transport parcels with travellers — faster and cheaper</div>
-
-      <form id="searchForm" class="search-bar" role="search" aria-label="Search transport requests">
-        <div class="autocomplete-wrapper" style="min-width:200px;max-width:260px;">
-          <select id="searchType" class="select" aria-label="Request type">
-            <option value="">Any type</option>
-            <option value="shipper">Shipper (looking to send)</option>
-            <option value="traveller">Traveller (offering transport)</option>
-          </select>
-        </div>
-
-        <div class="search-field">
-          <div class="autocomplete-wrapper">
-            <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or country)" aria-label="From" autocomplete="off" />
-            <ul id="suggestionsSearchFrom" class="suggestions-list"></ul>
-            <input type="hidden" id="searchFrom_cc" name="from_country" />
-            <input type="hidden" id="searchFrom_type" name="from_type" />
-          </div>
-
-          <div class="autocomplete-wrapper">
-            <input id="searchTo" class="input" type="text" placeholder="Going to (city or country)" aria-label="To" autocomplete="off" />
-            <ul id="suggestionsSearchTo" class="suggestions-list"></ul>
-            <input type="hidden" id="searchTo_cc" name="to_country" />
-            <input type="hidden" id="searchTo_type" name="to_type" />
-          </div>
-
-          <input
-            id="searchDate"
-            class="date"
-            type="date"
-            placeholder="When"
-            aria-label="Date"
-          />
-          <script>
-            /* If on mobile, switch to text mode initially so placeholder is visible */
-            if (window.innerWidth <= 720) {
-              const d = document.getElementById('searchDate');
-              d.type = 'text';
-              d.addEventListener('focus', function(){ this.type='date'; });
-              d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
+        async function parseBody(req: Request): Promise<any> {
+            const contentType = req.headers.get("content-type") || "";
+            if (contentType.includes("application/json")) {
+                return await req.json().catch(() => ({}));
             }
-          </script>
-        </div>
-
-        <div>
-          <button id="doSearch" class="search-btn">Search</button>
-        </div>
-      </form>
-    </div>
-  </section>
-
-  <main class="container">
-    <h3 class="section-title">Open Requests</h3>
-    <div id="resultsRoot" aria-live="polite">
-    </div>
-  </main>
-
-  <div id="modalRoot" style="display:none"></div>
-  <div id="successRoot" style="display:none"></div>
-  <div id="toastRoot" class="toast-root"></div>
-
-  <script>
-    /* --- CONFIG --- */
-    const WORKER_URL = 'https://weightshare-backend.weightshare.workers.dev'; // <<< IMPORTANT: Update with YOUR actual deployed Worker URL!
-    const LIST_ROUTE = '/list';
-    const ADD_ROUTE = '/add-request';
-    const CLOSE_ROUTE = '/close-request';
-    const SEARCH_LOCATIONS_ROUTE = '/search-locations'; // New route for location search
-
-    // State to store selected location details (value, country code, type) for both search and add forms
-    let searchState = {
-      from: { val: '', cc: '', type: '' }, // For search form 'from'
-      to:   { val: '', cc: '', type: '' }, // For search form 'to'
-      addFrom: { val: '', cc: '', type: '' }, // For add form 'from'
-      addTo:   { val: '', cc: '', type: '' }  // For add form 'to'
-    };
-
-    /* --- API HELPERS --- */
-    const api = {
-      async list(q = {}) {
-        const params = new URLSearchParams();
-        if (q.from) params.set('from', q.from);
-        if (q.to) params.set('to', q.to);
-        if (q.datepickup) params.set('datepickup', q.datepickup);
-        if (q.type) params.set('type', q.type);
-        if (q.from_country) params.set('from_country', q.from_country);
-        if (q.from_type) params.set('from_type', q.from_type);
-        if (q.to_country) params.set('to_country', q.to_country);
-        if (q.to_type) params.set('to_type', q.to_type);
-        
-        const url = WORKER_URL + LIST_ROUTE + (params.toString() ? ('?' + params.toString()) : '');
-        try {
-          const r = await fetch(url);
-          if (!r.ok) {
-            const errorText = await r.text();
-            console.error(`API Error (list): ${r.statusText} (${r.status}) - ${errorText}`);
-            return { status: 'error', message: `Server error: ${r.statusText}` };
-          }
-          return await r.json();
-        } catch (e) {
-          console.error("API Error (list):", e);
-          return { status: 'error', message: String(e) };
+            if (contentType.includes("application/x-www-form-urlencoded")) {
+                const formData = await req.formData();
+                const out: { [key: string]: any } = {};
+                for (const [key, value] of formData.entries()) {
+                    out[key] = value;
+                }
+                return out;
+            }
+            try {
+                return await req.json();
+            } catch (e) {
+                return {};
+            }
         }
-      },
-      async add(payload) {
-        try {
-          const r = await fetch(WORKER_URL + ADD_ROUTE, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify(payload)
-          });
-          if (!r.ok) {
-            const errorData = await r.json().catch(() => ({ message: 'Unknown error' }));
-            console.error(`API Error (add): ${r.statusText} (${r.status}) - ${errorData.message}`);
-            return { status:'error', message: errorData.message || `Server error: ${r.statusText}` };
-          }
-          return await r.json();
-        } catch (e) {
-          console.error("API Error (add):", e);
-          return { status:'error', message:String(e) };
+
+        const action = (url.searchParams.get("action") || "").toLowerCase();
+
+        // Helper to parse Type: ... from additionalinfo (legacy parsing, still useful for old entries)
+        function extractTypeFromNotes(additionalinfo: string | null | undefined): string | null {
+            if (!additionalinfo || typeof additionalinfo !== "string") return null;
+            const match = additionalinfo.match(/Type:\s*(shipper|traveller)/i);
+            return match ? match[1].toLowerCase() : null;
         }
-      },
-      async close(id) {
-        try {
-          const r = await fetch(WORKER_URL + CLOSE_ROUTE, {
-            method: 'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ id })
-          });
-          if (!r.ok) {
-            const errorText = await r.text();
-            console.error(`API Error (close): ${r.statusText} (${r.status}) - ${errorText}`);
-            return { status:'error', message: `Server error: ${r.statusText}` };
-          }
-          return await r.json();
-        } catch (e) {
-          console.error("API Error (close):", e);
-          return { status:'error', message:String(e) };
+
+        // --- NEW: Location Search Endpoint ---
+        if (
+            (method === "GET" && (pathname === "/search-locations" || pathname.endsWith("/search-locations"))) ||
+            (method === "GET" && action === "search-locations")
+        ) {
+            const query = (url.searchParams.get("query") || "").trim();
+            if (!query || query.length < 2) {
+                return jsonResponse([]);
+            }
+
+            const searchTerm = `%${query.toLowerCase()}%`;
+            try {
+                const { results } = await db.prepare(
+                    "SELECT val, cc, type, label FROM locations WHERE LOWER(val) LIKE ?1 OR LOWER(label) LIKE ?1 ORDER BY type DESC, val ASC LIMIT 10"
+                ).bind(searchTerm)
+                 .all();
+                return jsonResponse(results);
+            } catch (err: any) {
+                return jsonResponse({ status: "error", message: `Failed to search locations: ${String(err.message || err)}` }, 500);
+            }
         }
-      },
-      async searchLocations(query) {
-        if (!query) return [];
-        // Ensure the query parameter name matches your backend (q=)
-        const params = new URLSearchParams({ q: query }); 
-        const url = WORKER_URL + SEARCH_LOCATIONS_ROUTE + '?' + params.toString();
-        try {
-          const r = await fetch(url);
-          if (!r.ok) {
-              const errorText = await r.text();
-              console.error(`Location search failed: ${r.statusText} (${r.status}) - ${errorText}`);
-              return [];
-          }
-          return await r.json();
-        } catch (e) {
-          console.error("API Error (searchLocations):", e);
-          return [];
+        // --- END NEW: Location Search Endpoint ---
+
+        // ---------------- LIST with filters (UPDATED for new location fields) ----------------
+        if (
+            (method === "GET" && (pathname === "/list" || pathname.endsWith("/list"))) ||
+            (method === "GET" && action === "list")
+        ) {
+            try {
+                const queryParams = url.searchParams;
+
+                // Extract search parameters, including the new ones for hierarchical matching
+                const f_type = (queryParams.get("type") || "").trim().toLowerCase();
+                const f_date = (queryParams.get("datepickup") || "").trim();
+
+                const f_from_val = (queryParams.get("from") || "").trim();
+                const f_from_country = (queryParams.get("from_country") || "").trim();
+                const f_from_type = (queryParams.get("from_type") || "").trim().toLowerCase();
+
+                const f_to_val = (queryParams.get("to") || "").trim();
+                const f_to_country = (queryParams.get("to_country") || "").trim();
+                const f_to_type = (queryParams.get("to_type") || "").trim().toLowerCase();
+
+                let whereClauses = [`(status IS NULL OR status='' OR UPPER(status)='OPEN')`];
+                let bindParams: (string | number)[] = [];
+
+                if (f_type) {
+                    whereClauses.push("LOWER(type) = ?");
+                    bindParams.push(f_type);
+                }
+                if (f_date) {
+                    whereClauses.push("datepickup = ?");
+                    bindParams.push(f_date);
+                }
+
+                // --- HIERARCHICAL LOCATION MATCHING FOR 'FROM' ---
+                if (f_from_val) { // Proceed if there's any 'from' value
+                    if (f_from_country && f_from_type) { // If specific country/type is selected
+                        let fromClause = `
+                            (
+                                (from_country = ? AND (from_loc = ? OR from_type = 'country' OR ? = 'country'))
+                                OR (from_country IS NULL AND LOWER(from_loc) LIKE ?) -- Fallback for old/unspecified requests matching on text
+                            )
+                        `;
+                        whereClauses.push(fromClause);
+                        bindParams.push(f_from_country, f_from_val, f_from_type, `%${f_from_val.toLowerCase()}%`);
+                    } else { // Fallback if only text 'from' is provided (e.g., initial typing or old entries)
+                        whereClauses.push("LOWER(from_loc) LIKE ?");
+                        bindParams.push(`%${f_from_val.toLowerCase()}%`);
+                    }
+                }
+
+                // --- HIERARCHICAL LOCATION MATCHING FOR 'TO' ---
+                if (f_to_val) { // Proceed if there's any 'to' value
+                    if (f_to_country && f_to_type) { // If specific country/type is selected
+                        let toClause = `
+                            (
+                                (to_country = ? AND (to_loc = ? OR to_type = 'country' OR ? = 'country'))
+                                OR (to_country IS NULL AND LOWER(to_loc) LIKE ?) -- Fallback for old/unspecified requests matching on text
+                            )
+                        `;
+                        whereClauses.push(toClause);
+                        bindParams.push(f_to_country, f_to_val, f_to_type, `%${f_to_val.toLowerCase()}%`);
+                    } else { // Fallback if only text 'to' is provided
+                        whereClauses.push("LOWER(to_loc) LIKE ?");
+                        bindParams.push(`%${f_to_val.toLowerCase()}%`);
+                    }
+                }
+                // --- END HIERARCHICAL LOCATION MATCHING ---
+
+                const sql = `
+                    SELECT id, name, from_loc, to_loc, datepickup, mobile, email,
+                           additionalinfo, status, createdat, price_per_kg, type,
+                           from_country, to_country, from_type, to_type
+                    FROM requests
+                    WHERE ${whereClauses.join(" AND ")}
+                    ORDER BY datepickup ASC, createdat DESC
+                `;
+
+                const q = await db.prepare(sql).bind(...bindParams).all();
+                return jsonResponse(q.results || []);
+
+            } catch (err: any) {
+                return jsonResponse({ status: "error", message: `Failed to list requests: ${String(err.message || err)}` }, 500);
+            }
         }
-      }
-    };
 
-    /* --- UI HELPERS --- */
-    function showToast(text, {auto=2200, background='var(--success)', type='success'}={}) {
-      const root = document.getElementById('toastRoot');
-      const toastElement = document.createElement('div');
-      toastElement.className = `toast ${type}`;
-      toastElement.style.background = background;
-      toastElement.textContent = text;
-      root.appendChild(toastElement);
-
-      if (auto > 0) {
-        setTimeout(() => {
-          toastElement.remove(); // Remove the specific toast
-        }, auto);
-      }
-    }
-
-    function showSuccessModal(id) {
-      const root = document.getElementById('successRoot');
-      root.style.display = 'block';
-      root.innerHTML = `
-        <div class="modal-backdrop success-modal" role="dialog" aria-modal="true">
-          <div class="modal">
-            <h3 style="margin-top:0;color:var(--success)">✔ Request created</h3>
-            <p style="margin:8px 0 14px">Your request was submitted successfully. Save this ID to close the request later.</p>
-            <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:12px">
-              <div style="background:#fff;padding:10px 14px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04)">${id}</div>
-              <button id="copyId" class="btn ghost copy-btn">Copy ID</button>
-            </div>
-            <div style="display:flex;justify-content:center;gap:8px">
-              <button id="closeSuccess" class="btn ghost">Close</button>
-            </div>
-          </div>
-        </div>
-      `;
-      document.getElementById('copyId').addEventListener('click', async ()=>{
-        try {
-          await navigator.clipboard.writeText(id);
-          showToast('ID copied to clipboard', {auto:1600});
-        } catch (e) {
-          showToast('Could not copy', {auto:1600, background: 'var(--error)', type:'error'});
+        // ---------------- GET by id (UPDATED for new location fields) ----------------
+        if ((method === "GET" && (pathname === "/get" || pathname.endsWith("/get"))) || (method === "GET" && action === "get")) {
+            const id = url.searchParams.get("id") || (pathname.split("/get/")[1] || "");
+            if (!id) return jsonResponse({ status: "error", message: "ID missing" }, 400);
+            try {
+                const q = await db.prepare(
+                    `SELECT id, name, from_loc, to_loc, datepickup, mobile, email, additionalinfo, status, createdat, price_per_kg, type, from_country, to_country, from_type, to_type
+                     FROM requests WHERE id = ?`
+                ).bind(id).all();
+                if (!q.results || q.results.length === 0) return jsonResponse({ status: "error", message: "Not found" }, 404);
+                const row = q.results[0] as Record<string, any>;
+                // Ensure type and price_per_kg are correctly set if they were null/undefined
+                if (!row.type) row.type = extractTypeFromNotes(row.additionalinfo) || null;
+                if (typeof row.price_per_kg === "undefined") row.price_per_kg = null; // Normalize to null if not present
+                return jsonResponse(row);
+            } catch (err: any) {
+                return jsonResponse({ status: "error", message: `Failed to get request: ${String(err.message || err)}` }, 500);
+            }
         }
-      });
-      document.getElementById('closeSuccess').addEventListener('click', ()=>{
-        root.style.display = 'none';
-        root.innerHTML = '';
-      });
-    }
 
-    function cleanPhoneForWa(phone) {
-      if (!phone) return '';
-      let p = phone.toString().trim();
-      p = p.replace(/\s+/g,'');
-      p = p.replace(/[^\d]/g,'');
-      return p;
-    }
+        // ---------------- ADD (create) (UPDATED for new location fields) ----------------
+        if (method === "POST" && (pathname === "/add-request" || pathname.endsWith("/add") || action === "add")) {
+            const body = await parseBody(request);
 
-    function groupByDate(items){
-      const map = {};
-      items.forEach(it=>{
-        const dp = it.datepickup || it.datepickup_clean
-        ? new Date(it.datepickup || it.datepickup_clean).toISOString().slice(0,10)
-        : 'no-date';
-        if (!map[dp]) map[dp]=[];
-        map[dp].push(it);
-      });
-      const sortedKeys = Object.keys(map).sort();
-      const ordered = {};
-      sortedKeys.forEach(k=>ordered[k]=map[k]);
-      return ordered;
-    }
+            const name = body.name || "";
+            const from_loc = body.from || ""; // Use 'from' (val) from frontend
+            const to_loc = body.to || "";     // Use 'to' (val) from frontend
+            const datepickup = body.datepickup || "";
+            const price_per_kg = (body.price_per_kg !== undefined && body.price_per_kg !== '') ? parseFloat(body.price_per_kg) : null;
+            const mobile = body.mobile || "";
+            const email = body.email || "";
+            const additionalinfo = body.additionalinfo || "";
+            const type = (body.type || "").toLowerCase() || null;
 
-    function renderGrouped(list){
-      const root = document
+            // NEW: Get the country code and type from the frontend's hidden inputs
+            const from_country = body.from_country || "";
+            const to_country = body.to_country || "";
+            const from_type = (body.from_type || "").toLowerCase();
+            const to_type = (body.to_type || "").toLowerCase();
+
+            // Enhanced validation for new fields
+            if (!name || !from_loc || !to_loc || !datepickup || !type || !from_country || !to_country || !from_type || !to_type) {
+                return jsonResponse({ status: "error", message: "Missing required fields (name, from, to, datepickup, type, and full location details: from_country, to_country, from_type, to_type)." }, 400);
+            }
+
+            // More robust ID generation
+            const id = "R" + Date.now().toString().slice(-8) + Math.random().toString(36).substring(2, 6).toUpperCase();
+            const createdAt = new Date().toISOString();
+
+            try {
+                await db.prepare(
+                    `INSERT INTO requests (id, name, from_loc, to_loc, datepickup, price_per_kg, mobile, email, additionalinfo, status, createdat, type, from_country, to_country, from_type, to_type)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                )
+                .bind(
+                    id, name, from_loc, to_loc, datepickup, price_per_kg, mobile, email,
+                    additionalinfo, "OPEN", createdAt, type, from_country, to_country, from_type, to_type
+                )
+                .run();
+
+                return jsonResponse({ status: "ok", id });
+            } catch (err: any) {
+                return jsonResponse({ status: "error", message: `Failed to add request: ${String(err.message || err)}` }, 500);
+            }
+        }
+
+        // ---------------- CLOSE ----------------
+        if (method === "POST" && (pathname === "/close-request" || pathname.endsWith("/close") || action === "close")) {
+            const body = await parseBody(request);
+            const id = body.id || url.searchParams.get("id") || (pathname.split("/close/")[1] || "");
+            if (!id) return jsonResponse({ status: "error", message: "ID missing" }, 400);
+            try {
+                const r = await db.prepare(`UPDATE requests SET status = ? WHERE id = ?`).bind("CLOSED", id).run();
+                return jsonResponse({ status: "ok", changed: r.changes || 0 });
+            } catch (err: any) {
+                return jsonResponse({ status: "error", message: `Failed to close request: ${String(err.message || err)}` }, 500);
+            }
+        }
+
+        return jsonResponse({ status: "ok", message: "Worker running. Use /list, /get?id=, /add-request, /close-request, /search-locations or ?action=list/add/close/search-locations" });
+    },
+};
+
+// Optional: Define interfaces for better TypeScript type checking
+// Ensure these are consistent with your D1 schema
+interface Env {
+    DB: D1Database;
+}
+
+interface D1Database {
+    prepare(query: string): D1PreparedStatement;
+}
+
+interface D1PreparedStatement {
+    bind(...values: (string | number | null)[]): D1PreparedStatement;
+    first<T = Record<string, any>>(colName?: string): Promise<T | null>;
+    run(): Promise<D1Result>;
+    all<T = Record<string, any>>(): Promise<D1Result<T[]>>;
+    raw<T = Record<string, any>>(): Promise<T[][]>;
+}
+
+interface D1Result<T = any> {
+    success: boolean;
+    error?: string;
+    results?: T;
+    changes?: number;
+    duration?: number;
+    lastRowId?: number;
+}
+
+interface ExecutionContext {
+    waitUntil(promise: Promise<any>): void;
+    passThroughOnException(): void;
+}
