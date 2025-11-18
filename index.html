@@ -81,6 +81,38 @@
   }
   /* --- MOBILE OPTIMIZATION END --- */
   .wa-icon{width:18px;height:18px;display:inline-block}
+  
+  /* Fix invisible first line in dropdown (iOS/Safari issue) */
+.autocomplete-item-title {
+  font-size: 16px !important;
+  font-weight: 500;
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  display: block;
+  text-align: left;
+}
+
+/* Compact dropdown items */
+.autocomplete-item {
+  padding: 6px 12px !important;
+  line-height: 1.2;
+  border-bottom: 1px solid #eee;
+  text-align: left !important;
+}
+
+/* Subtitle (airport code, country) */
+.autocomplete-item-subtitle {
+  font-size: 13px;
+  color: #666;
+  text-align: left !important;
+}
+
+/* Make sure nothing forces transparency */
+.autocomplete-item * {
+  opacity: 1 !important;
+  color: inherit !important;
+}
+  
 </style>
 </head>
 <body>
