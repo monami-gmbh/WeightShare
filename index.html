@@ -5,774 +5,1094 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>WeightShare — Transport by Travellers</title>
 <style>
-  :root{
-    --blue:#0ea5ff;
-    --navy:#0f172a;
-    --muted:#6b7280;
-    --success:#16a34a;
-    --bg:#f8fafc;
-    --card:#ffffff;
+  :root {
+    --bg: #f8fafc;
+    --dark: #0b1220;
+    --muted: #6b7280;
+    --border: #e6eef8;
+    --light-border: #f1f5f9;
+    --blue: #2563eb;
+    --green: #22c55e;
+    --success: #16a34a;
+    --error: #ef4444;
   }
-  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:#0b1220;background:var(--bg);}
-  .container{max-width:1100px;margin:0 auto;padding:20px;}
-  header{background:#fff;box-shadow:0 6px 18px rgba(12,13,19,0.06);position:sticky;top:0;z-index:60;}
-  .nav-wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;}
-  .logo{font-weight:700;color:var(--blue);font-size:20px;}
-  .nav-actions{display:flex;gap:14px;align-items:center}
-  .btn{background:var(--navy);color:#fff;padding:8px 14px;border-radius:10px;border:none;cursor:pointer}
-  .btn.ghost{background:transparent;color:var(--navy);border:1px solid #e6eef8}
-  .hero{height:260px;border-radius:10px;margin-top:20px;background-image: linear-gradient(90deg, rgba(6,11,26,0.65), rgba(6,11,26,0.25)), url('https://images.unsplash.com/photo-1501700493788-fa1a4fc9fe62?auto=format&fit=crop&w=1500&q=60');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#fff;}
-  .hero-inner{width:100%;max-width:980px;padding:18px}
-  .hero-title{font-size:26px;margin:0 0 12px;font-weight:700}
-  .search-bar{background:rgba(255,255,255,0.98);border-radius:12px;padding:12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 18px rgba(2,6,23,0.12);}
-  .search-field{display:flex;gap:8px;align-items:center}
-  .select,.input,.date{background:#fff;border:1px solid #e6eef8;padding:10px 12px;border-radius:8px;min-width:140px;font-size:14px;color:#0b1220}
-  .input{flex:1}
-  .search-btn{background:var(--blue);color:#fff;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:600}
-  main{margin-top:22px}
-  .section-title{font-size:18px;margin:8px 0 14px;color:var(--navy);font-weight:600}
-  .date-group{margin-top:8px}
-  .date-header{font-weight:700;color:#0b1220;margin:18px 0 8px}
-  .ticket{display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:12px;border-radius:8px;box-shadow:0 4px 10px rgba(2,6,23,0.06);margin-bottom:8px;cursor:pointer}
-  .ticket-left{display:flex;gap:12px;align-items:center;flex:1;min-width:0}
-  .route{font-weight:700}
-  .meta{color:var(--muted);font-size:13px;margin-top:4px}
-  .whatsapp-btn{background:#25D366;color:#fff;padding:8px 10px;border-radius:8px;border:none;display:inline-flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}
-  .price{font-weight:800;font-size:16px;color:#0b1220;min-width:88px;text-align:right}
-  .small-muted{color:var(--muted);font-size:13px}
-  /* modal/backdrop */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:120}
-  .modal{width:100%;max-width:760px;background:#fff;padding:18px;border-radius:12px;box-shadow:0 10px 40px rgba(2,6,23,0.3)}
-  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-  .form-group{display:flex;flex-direction:column;gap:6px}
-  label{font-size:13px;color:#111;font-weight:600}
-  input[type="text"], input[type="date"], input[type="tel"], input[type="email"], input[type="number"], select, textarea{padding:10px;border-radius:8px;border:1px solid #e6eef8;font-size:14px;background:#fff;outline:none}
-  textarea{resize:vertical;min-height:80px}
-  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
-  .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:200;box-shadow:0 8px 24px rgba(2,6,23,0.18)}
-  .success-modal .modal{max-width:520px;text-align:center}
-  .copy-btn{background:#fff;color:var(--success);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:8px;cursor:pointer}
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--dark);
+    line-height: 1.5;
+  }
+  input, button, select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    margin: 0;
+    line-height: inherit;
+  }
+  a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* Layout Containers */
+  .container {
+    max-width: 900px; /* Adjusted to fit your overall layout */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  /* Header */
+  header {
+    background-color: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0; /* Adjusted for container padding */
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  .nav-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--dark);
+    text-decoration: none;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background-color: var(--blue);
+    color: #fff;
+    border: 1px solid var(--blue);
+    transition: all 0.15s ease-in-out;
+  }
+  .btn:hover {
+    background-color: #1e40af; /* Darker blue */
+    border-color: #1e40af;
+    text-decoration: none;
+  }
+  .btn.ghost {
+    background-color: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn.ghost:hover {
+    background-color: var(--light-border);
+    color: var(--dark);
+  }
+
+  /* Hero Section */
+  .hero {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1572911475739-165c71a37c4e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center center / cover no-repeat;
+    color: #fff;
+    padding: 4rem 1.5rem 6rem; /* Increased bottom padding to accommodate search bar */
+    text-align: center;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .hero-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    line-height: 1.2;
+  }
+  .search-bar {
+    display: flex; /* Use flexbox for layout */
+    background-color: #fff;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    gap: 0.5rem;
+    max-width: 900px; /* Matches container max-width */
+    width: 100%;
+    margin-top: -80px; /* Pulls it up into the hero section */
+    position: relative;
+    z-index: 10;
+  }
+  .search-bar .search-field {
+    display: flex; /* For inner fields like from/to/date */
+    flex: 1; /* Allows it to grow and shrink */
+    gap: 0.5rem;
+    align-items: center;
+    min-width: 0; /* Allows flex items to shrink */
+  }
+  .search-bar .input,
+  .search-bar .select,
+  .search-bar .date {
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.15s ease-in-out;
+    width: 100%; /* Important for inputs inside wrapper */
+    box-sizing: border-box; /* Include padding and border in width */
+  }
+  .search-bar .input:focus,
+  .search-bar .select:focus,
+  .search-bar .date:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  }
+  .search-bar .date {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: relative;
+  }
+  .search-bar .date::-webkit-calendar-picker-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+  }
+  .search-bar .date::-webkit-datetime-edit { display: inline-block; padding: 0; }
+  .search-bar .date::placeholder { color: var(--muted); }
+  
+  .search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background-color: var(--blue);
+    color: #fff;
+    border: 1px solid var(--blue);
+    transition: all 0.15s ease-in-out;
+    white-space: nowrap;
+  }
+  .search-btn:hover {
+    background-color: #1e40af; /* Darker blue */
+    border-color: #1e40af;
+  }
 
   /* Autocomplete specific styles */
-  .autocomplete-wrapper {
-    position: relative;
-    display: flex; /* Make the wrapper itself a flex container */
-    flex: 1;      /* Allow it to grow in a flex context (for search bar) */
-    min-width: 0; /* Allow it to shrink if needed */
-  }
-  .autocomplete-wrapper .input {
-    width: 100%; /* Ensure the input fills the wrapper in modal and other non-flex contexts */
-    box-sizing: border-box; /* Include padding and border in the element's total width */
-  }
-  .suggestions-list {
-    position: absolute;
-    top: 100%; /* Position right below the input */
-    left: 0;
-    right: 0;
-    background-color: #fff;
-    border: 1px solid #e6eef8;
-    border-top: none; /* Make it look like it's connected to the input */
-    border-radius: 0 0 8px 8px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: 0 4px 10px rgba(2,6,23,0.06);
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 100; /* Ensure it's above other elements */
-    display: none; /* Hidden by default */
-  }
-  .suggestions-list li {
-    padding: 10px 12px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #0b1220;
-  }
-  .suggestions-list li:hover,
-  .suggestions-list li.active { /* 'active' class for keyboard navigation */
-    background-color: var(--blue);
-    color: #fff;
-  }
-  .suggestions-list li.active .muted-text {
-    color: rgba(255,255,255,0.7); /* Muted text in active state */
-  }
-  .suggestions-list li .muted-text {
-    color: var(--muted);
-    font-size: 12px;
-    margin-left: 8px;
-  }
-  /* --- MOBILE OPTIMIZATION START --- */
-  @media (max-width:720px){
-    /* General Layout */
-    .container { padding: 15px; }
-    
-    /* Hero Section - Auto height to fit stacked search bar */
-    .hero { height: auto; padding: 25px 15px; text-align: center; }
-    .hero-title { font-size: 22px; line-height: 1.3; }
-    
-    /* Search Bar - Stacked */
-    .search-bar { flex-direction: column; align-items: stretch; gap: 12px; }
-    .search-field { flex-direction: column; width: 100%; }
-    .input, .select, .date { width: 100%; box-sizing: border-box; height: 44px; } /* Bigger touch targets */
-    .search-btn { width: 100%; height: 44px; margin-top: 4px; }
+  .autocomplete-wrapper {
+    position: relative; /* CRITICAL: Establishes positioning context for children */
+    flex: 1; /* Allows it to grow in a flex context, e.g., inside search-field */
+    min-width: 0; /* Allows it to shrink in flex containers */
+  }
+  .suggestions-list {
+    position: absolute; /* CRITICAL: Makes it float over other content */
+    top: 100%; /* Position right below the input */
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid var(--border);
+    border-top: none; /* Makes it look like it's connected to the input */
+    border-radius: 0 0 8px 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 4px 10px rgba(2,6,23,0.06);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100; /* Ensure it's above other elements like modals or other form fields */
+    display: none; /* Hidden by default */
+  }
+  .suggestions-list li {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--dark);
+    display: flex; /* Make li a flex container */
+    justify-content: space-between; /* Space out name and country_name */
+    align-items: center;
+  }
+  .suggestions-list li:hover,
+  .suggestions-list li.active { /* 'active' class for keyboard navigation */
+    background-color: var(--blue);
+    color: #fff;
+  }
+  .suggestions-list li.active .muted-text {
+    color: rgba(255,255,255,0.7); /* Muted text in active state */
+  }
+  .suggestions-list li .muted-text {
+    color: var(--muted);
+    font-size: 12px;
+    margin-left: 8px;
+    flex-shrink: 0; /* Prevent it from shrinking too much */
+  }
 
-    /* Modals */
-    .form-grid{grid-template-columns:1fr}
-    .modal { width: 90%; margin: 10px; max-height: 85vh; overflow-y: auto; }
+  /* Main content area */
+  main.container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  .section-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--dark);
+  }
+  .date-group {
+    margin-bottom: 1.5rem;
+  }
+  .date-header {
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: var(--dark);
+  }
+  .ticket {
+    background-color: #fff;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  }
+  .ticket-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    padding-right: 1rem; /* Space for price */
+  }
+  .ticket-left:focus {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+    border-radius: 0.75rem;
+  }
+  .ticket-left .route {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ticket-left .meta {
+    font-size: 0.875rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .price {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--dark);
+    margin-left: 1rem;
+    white-space: nowrap;
+  }
+  .whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background-color: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+    white-space: nowrap;
+  }
+  .whatsapp-btn:hover {
+    background-color: #16a34a; /* Darker green */
+  }
+  .wa-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .small-muted {
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
 
-    /* Ticket Results - Card View */
-    .ticket { 
-      flex-direction: column; 
-      align-items: stretch; 
-      padding: 16px;
-      position: relative;
+  /* Modals */
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fade-in 0.2s ease-out;
+  }
+  .modal {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05);
+    max-width: 500px;
+    width: 90%;
+    animation: zoom-in 0.2s ease-out;
+    position: relative;
+    z-index: 1001;
+  }
+  .modal h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    position: relative; /* CRITICAL for autocomplete in modal: Establishes positioning context */
+  }
+  .form-group label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.15s ease-in-out;
+    box-sizing: border-box; /* Crucial for consistent sizing */
+    width: 100%; /* Ensure they take full width of their grid cell */
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  }
+  .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Toast Messages */
+  .toast-root {
+    position: fixed;
+    bottom: 20px; /* Moved to bottom for better UX */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center; /* Center toasts horizontally */
+  }
+  .toast {
+    background-color: var(--success);
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slide-up 0.3s ease-out;
+    width: fit-content; /* Only take content width */
+    max-width: 90vw; /* Prevent from being too wide on small screens */
+  }
+  .toast.error {
+    background-color: var(--error);
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes zoom-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 1.75rem;
     }
-    
-    /* Move Price to Top for visibility */
-    .price { 
-      order: -1; 
-      width: 100%; 
-      text-align: left; 
-      margin-bottom: 8px;
-      border-bottom: 1px solid #f1f5f9;
-      padding-bottom: 8px;
-      color: var(--blue);
-      font-size: 18px;
+    .search-bar {
+      flex-direction: column;
+      margin-top: -60px;
+      padding: 0.75rem; /* Ensure consistent padding */
     }
-    
-    /* Ticket content wrapper */
-    .ticket-left { 
-      flex-direction: column; 
-      align-items: flex-start; 
-      width: 100%; 
+    .search-bar .search-field {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
     }
-    .ticket-left > div:first-child { width: 100%; } /* Route text */
-    
-    /* WhatsApp Button - Full Width */
-    .ticket-left > div:last-child { 
-      margin-left: 0; 
-      width: 100%; 
-      margin-top: 12px; 
+    .search-bar .search-field > *:not(.autocomplete-wrapper):not(.search-btn) {
+        width: 100%;
     }
-    .whatsapp-btn { 
-      width: 100%; 
-      justify-content: center; 
-      padding: 12px;
-      font-size: 15px;
+    .autocomplete-wrapper {
+        width: 100%; /* Ensure autocomplete wrappers take full width */
+    }
+    .search-bar .select,
+    .search-bar .input,
+    .search-bar .date,
+    .search-bar .search-btn {
+        width: 100%;
+    }
+
+    .modal {
+      width: 95%;
+      padding: 1.5rem;
+    }
+    .form-grid {
+      grid-template-columns: 1fr; /* Single column on small screens */
+    }
+    .form-group {
+      width: 100%;
+    }
+    .ticket {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem;
+    }
+    .ticket-left {
+      width: 100%;
+      padding-right: 0;
+      justify-content: space-between;
+    }
+    .ticket-left > div:first-child {
+      min-width: unset;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    .ticket-left > div:last-child {
+      flex-shrink: 0;
+    }
+    .price {
+      margin-left: 0;
+      width: 100%;
+      text-align: right;
+    }
+    header .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    main.container {
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
   }
-  /* --- MOBILE OPTIMIZATION END --- */
-
-  /* icons */
-  .wa-icon{width:18px;height:18px;display:inline-block}
 </style>
 </head>
-<body>
-
-<header>
-  <div class="container nav-wrap">
-    <div class="logo">WeightShare</div>
-    <div class="nav-actions">
-      <button id="openAdd" class="btn">➕ Add Request</button>
-    </div>
-  </div>
-</header>
-
-<section class="hero">
-  <div class="hero-inner container">
-    <div class="hero-title">Send or transport parcels with travellers — faster and cheaper</div>
-
-    <form id="searchForm" class="search-bar" role="search" aria-label="Search transport requests">
-      <div class="search-field" style="min-width:200px;max-width:260px;">
-        <select id="searchType" class="select" aria-label="Request type">
-          <option value="">Any type</option>
-          <option value="shipper">Shipper (looking to send)</option>
-          <option value="traveller">Traveller (offering transport)</option>
-        </select>
-      </div>
-
-      <div class="search-field" style="flex:1">
-        <div class="autocomplete-wrapper">
-                <input id="searchFrom" class="input" type="text" placeholder="Leaving from (city or country)" aria-label="From" autocomplete="off" />
-                <ul id="suggestionsSearchFrom" class="suggestions-list"></ul>
-                <input type="hidden" id="searchFrom_cc" name="from_country" />
-                <input type="hidden" id="searchFrom_type" name="from_type" />
-            </div>
-
-            <div class="autocomplete-wrapper">
-                <input id="searchTo" class="input" type="text" placeholder="Going to (city or country)" aria-label="To" autocomplete="off" />
-                <ul id="suggestionsSearchTo" class="suggestions-list"></ul>
-                <input type="hidden" id="searchTo_cc" name="to_country" />
-                <input type="hidden" id="searchTo_type" name="to_type" />
-            </div>
-        
-        <input 
-          id="searchDate" 
-          class="date" 
-          type="date" 
-          placeholder="When" 
-          aria-label="Date" 
-        />
-        <script>
-          /* If on mobile, switch to text mode initially so placeholder is visible */
-          if (window.innerWidth <= 720) {
-            const d = document.getElementById('searchDate');
-            d.type = 'text'; 
-            d.addEventListener('focus', function(){ this.type='date'; });
-            d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
-          }
-        </script>
-      </div>
-
-      <div>
-        <button id="doSearch" class="search-btn">Search</button>
-      </div>
-    </form>
-  </div>
-</section>
-
-<main class="container">
-  <h3 class="section-title">Open Requests</h3>
-  <div id="resultsRoot" aria-live="polite">
-    </div>
-</main>
-
-<div id="modalRoot" style="display:none"></div>
-<div id="successRoot" style="display:none"></div>
-<div id="toastRoot" style="position:fixed;top:0;left:0;right:0;pointer-events:none"></div>
-
 <script>
-/* --- CONFIG --- */
-const WORKER_URL = 'https://weightshare-backend.weightshare.workers.dev'; // <<< IMPORTANT: Update with YOUR actual deployed Worker URL!
-const LIST_ROUTE = '/list';
-const ADD_ROUTE = '/add-request';
-const CLOSE_ROUTE = '/close-request';
-const SEARCH_LOCATIONS_ROUTE = '/search-locations'; // New route for location search
+  /* --- CONFIG --- */
+  const WORKER_URL = 'https://weightshare-backend.weightshare.workers.dev'; // <<< IMPORTANT: Update with YOUR actual deployed Worker URL!
+  const LIST_ROUTE = '/list';
+  const ADD_ROUTE = '/add-request';
+  const CLOSE_ROUTE = '/close-request';
+  const SEARCH_LOCATIONS_ROUTE = '/search-locations'; // New route for location search
 
-// State to store selected location details (value, country code, type) for both search and add forms
-let searchState = {
-  from: { val: '', cc: '', type: '' }, // For search form 'from'
-  to:   { val: '', cc: '', type: '' }, // For search form 'to'
-  addFrom: { val: '', cc: '', type: '' }, // For add form 'from'
-  addTo:   { val: '', cc: '', type: '' }  // For add form 'to'
-};
+  // State to store selected location details (value, country code, type) for both search and add forms
+  let searchState = {
+    from: { val: '', cc: '', type: '' }, // For search form 'from'
+    to:   { val: '', cc: '', type: '' }, // For search form 'to'
+    addFrom: { val: '', cc: '', type: '' }, // For add form 'from'
+    addTo:   { val: '', cc: '', type: '' }  // For add form 'to'
+  };
 
-/* --- API HELPERS --- */
-const api = {
-  async list(q = {}) {
-    const params = new URLSearchParams();
-    if (q.from) params.set('from', q.from);
-    if (q.to) params.set('to', q.to);
-    if (q.datepickup) params.set('datepickup', q.datepickup);
-    if (q.type) params.set('type', q.type);
-    if (q.from_country) params.set('from_country', q.from_country);
-    if (q.from_type) params.set('from_type', q.from_type);
-    if (q.to_country) params.set('to_country', q.to_country);
-    if (q.to_type) params.set('to_type', q.to_type);
-    
-    const url = WORKER_URL + LIST_ROUTE + (params.toString() ? ('?' + params.toString()) : '');
-    try {
-      const r = await fetch(url);
-      return await r.json();
-    } catch (e) {
-      console.error("API Error (list):", e);
-      return { status: 'error', message: String(e) };
-    }
-  },
-  async add(payload) {
-    try {
-      const r = await fetch(WORKER_URL + ADD_ROUTE, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      return await r.json();
-    } catch (e) {
-      console.error("API Error (add):", e);
-      return { status:'error', message:String(e) };
-    }
-  },
-  async close(id) {
-    try {
-      const r = await fetch(WORKER_URL + CLOSE_ROUTE, {
-        method: 'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ id })
-      });
-      return await r.json();
-    } catch (e) {
-      console.error("API Error (close):", e);
-      return { status:'error', message:String(e) };
-    }
-  },
-  async searchLocations(query) {
-    if (!query) return [];
-    const params = new URLSearchParams({ q: query });
-    const url = WORKER_URL + SEARCH_LOCATIONS_ROUTE + '?' + params.toString();
-    try {
-      const r = await fetch(url);
-      if (!r.ok) {
-          console.error(`Location search failed: ${r.statusText}`);
-          return [];
+  /* --- API HELPERS --- */
+  const api = {
+    async list(q = {}) {
+      const params = new URLSearchParams();
+      if (q.from) params.set('from', q.from);
+      if (q.to) params.set('to', q.to);
+      if (q.datepickup) params.set('datepickup', q.datepickup);
+      if (q.type) params.set('type', q.type);
+      if (q.from_country) params.set('from_country', q.from_country);
+      if (q.from_type) params.set('from_type', q.from_type);
+      if (q.to_country) params.set('to_country', q.to_country);
+      if (q.to_type) params.set('to_type', q.to_type);
+      
+      const url = WORKER_URL + LIST_ROUTE + (params.toString() ? ('?' + params.toString()) : '');
+      try {
+        const r = await fetch(url);
+        if (!r.ok) {
+          const errorText = await r.text();
+          console.error(`API Error (list): ${r.statusText} (${r.status}) - ${errorText}`);
+          return { status: 'error', message: `Server error: ${r.statusText}` };
+        }
+        return await r.json();
+      } catch (e) {
+        console.error("API Error (list):", e);
+        return { status: 'error', message: String(e) };
       }
-      return await r.json();
-    } catch (e) {
-      console.error("API Error (searchLocations):", e);
-      return [];
-    }
-  }
-};
-
-/* --- UI HELPERS --- */
-function showToast(text, {auto=2200, background='var(--success)'}={}) {
-  const root = document.getElementById('toastRoot');
-  root.innerHTML = `<div class="toast" style="background:${background}">${text}</div>`;
-  if (auto>0) setTimeout(()=>root.innerHTML='', auto);
-}
-
-function showSuccessModal(id) {
-  const root = document.getElementById('successRoot');
-  root.style.display = 'block';
-  root.innerHTML = `
-    <div class="modal-backdrop success-modal" role="dialog" aria-modal="true">
-      <div class="modal">
-        <h3 style="margin-top:0;color:var(--success)">✔ Request created</h3>
-        <p style="margin:8px 0 14px">Your request was submitted successfully. Save this ID to close the request later.</p>
-        <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:12px">
-          <div style="background:#fff;padding:10px 14px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04)">${id}</div>
-          <button id="copyId" class="copy-btn">Copy ID</button>
-        </div>
-        <div style="display:flex;justify-content:center;gap:8px">
-          <button id="closeSuccess" class="btn ghost">Close</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.getElementById('copyId').addEventListener('click', async ()=>{
-    try {
-      await navigator.clipboard.writeText(id);
-      showToast('ID copied to clipboard', {auto:1600});
-    } catch (e) {
-      showToast('Could not copy', {auto:1600, background: '#ef4444'});
-    }
-  });
-  document.getElementById('closeSuccess').addEventListener('click', ()=>{
-    root.style.display = 'none';
-    root.innerHTML = '';
-  });
-}
-
-function cleanPhoneForWa(phone) {
-  if (!phone) return '';
-  let p = phone.toString().trim();
-  p = p.replace(/\s+/g,'');
-  p = p.replace(/[^\d]/g,'');
-  return p;
-}
-
-function groupByDate(items){
-  const map = {};
-  items.forEach(it=>{
-    const dp = it.datepickup || it.datepickup_clean
-    ? new Date(it.datepickup || it.datepickup_clean).toISOString().slice(0,10)
-    : 'no-date';
-    if (!map[dp]) map[dp]=[];
-    map[dp].push(it);
-  });
-  const sortedKeys = Object.keys(map).sort();
-  const ordered = {};
-  sortedKeys.forEach(k=>ordered[k]=map[k]);
-  return ordered;
-}
-
-function renderGrouped(list){
-  const root = document.getElementById('resultsRoot');
-  root.innerHTML = '';
-  if (!Array.isArray(list) || list.length === 0) {
-    root.innerHTML = '<div class="small-muted">No open requests found.</div>';
-    return;
-  }
-  const grouped = groupByDate(list);
-  Object.keys(grouped).forEach(dateKey=>{
-    const group = grouped[dateKey];
-    const h = document.createElement('div');
-    h.className = 'date-group';
-    const pretty = dateKey==='no-date' ? 'No date' : (new Date(dateKey)).toLocaleDateString(undefined, { weekday:'long', day:'numeric', month:'short' });
-    h.innerHTML = `<div class="date-header">${pretty}</div>`;
-    root.appendChild(h);
-    
-    group.forEach(item=>{
-      const ticket = document.createElement('div');
-      ticket.className = 'ticket';
-      let typeLabel = '';
-      if (item.type) { typeLabel = item.type; } 
-      
-      const from = item.from_loc || item.from || ''; // Use from_loc for display consistency
-      const to = item.to_loc || item.to || '';     // Use to_loc for display consistency
-      const name = item.name || '—';
-      const mobile = item.mobile || '';
-      const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
-      const cleanMobile = cleanPhoneForWa(mobile);
-      
-      ticket.innerHTML = `
-        <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${name}">
-          <div style="min-width:0">
-            <div class="route">${from} → ${to} ${typeLabel ? `<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${typeLabel}</small>` : ''}</div>
-            <div class="meta">${name} • <span class="small-muted">${mobile || ''}</span></div>
-          </div>
-          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-            <button class="whatsapp-btn" data-wa="${cleanMobile}" title="Contact on WhatsApp">
-              <svg class="wa-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M20.5 3.5A11.9 11.9 0 0 0 12 1.1 11.9 11.9 0 0 0 3.5 3.5 11.9 11.9 0 0 0 1.1 12c0 2.2.6 4.3 1.8 6.2L1 23l4.1-1.3A11.9 11.9 0 0 0 12 22.9h.1c2.2 0 4.3-.6 6.2-1.8A11.9 11.9 0 0 0 22.9 12 11.9 11.9 0 0 0 20.5 3.5zM12 20c-1.8 0-3.5-.5-5-1.5l-.4-.2-2.4.8.8-2.3-.2-.3A8 8 0 1 1 20 12 8 8 0 0 1 12 20z"/><path fill="#fff" d="M17.2 14.2c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.3.3-1 1-.9 1.2.1.3 1.4 2.2 3 3.1 1.7.9 2 .7 2.3.6.3-.1.9-.4 1-1 .1-.5.3-1 .2-1.1-.1-.1-.3-.2-.6-.3z"/></svg>
-              <span style="font-size:13px">WhatsApp</span>
-            </button>
-          </div>
-        </div>
-        <div class="price">${price}</div>
-      `;
-      ticket.querySelector('.ticket-left').addEventListener('click', ()=>openDetail(item));
-      ticket.querySelector('.ticket-left').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
-      ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
-        ev.stopPropagation();
-        const wa = ev.currentTarget.dataset.wa || '';
-        if (!wa) { showToast('No phone number', {background: '#ef4444'}); return; }
-        window.open('https://wa.me/' + wa, '_blank');
-      });
-      document.getElementById('resultsRoot').appendChild(ticket);
-    });
-  });
-}
-
-function openDetail(item){
-  const root = document.getElementById('modalRoot');
-  root.style.display = 'block';
-  const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
-  const created = item.createdat ? new Date(item.createdat).toLocaleString() : '';
-  
-  const fromDisplay = item.from_loc || item.from || '—'; // Use from_loc for display consistency
-  const toDisplay = item.to_loc || item.to || '—';     // Use to_loc for display consistency
-  const typeDisplay = item.type || '—';
-
-  root.innerHTML = `
-    <div class="modal-backdrop" role="dialog" aria-modal="true">
-      <div class="modal">
-        <h3 style="margin-top:0">${fromDisplay} → ${toDisplay}</h3>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <div style="flex:1">
-            <p><strong>${item.name || '—'}</strong></p>
-            <p class="small-muted">Type: ${typeDisplay}</p>
-            <p class="small-muted">Date: ${item.datepickup || '—'}</p>
-            <p class="small-muted">Phone: ${item.mobile || '—'}</p>
-            <p class="small-muted">Email: ${item.email || '—'}</p>
-            <p style="margin-top:8px">${item.additionalinfo || ''}</p>
-          </div>
-          <div style="width:160px;text-align:right">
-            <div style="font-size:14px;color:var(--muted)">Price</div>
-            <div style="font-weight:800;font-size:18px">${price}</div>
-            <div style="margin-top:14px;color:var(--muted);font-size:12px">${created}</div>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-          <button id="closeDetailBtn" class="btn ghost">Close</button>
-          <button id="closeRequestBtn" class="btn" style="background:#ef4444">Close Request</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.getElementById('closeDetailBtn').addEventListener('click', closeModalRoot);
-  document.getElementById('closeRequestBtn').addEventListener('click', async ()=>{
-    const confirmId = prompt('To confirm closing, enter the request ID:');
-    if (!confirmId || confirmId !== item.id) { showToast('Cancelled or ID mismatch', {background: '#ef4444'}); return; }
-    showToast('Closing request...');
-    const res = await api.close(item.id);
-    if (res && res.status === 'ok') {
-      showToast('Request closed', {auto:1800});
-      closeModalRoot();
-      await doSearch(); // refresh
-    } else {
-      showToast('Failed closing: ' + (res?.message || 'error'), {auto:3000, background: '#ef4444'});
-    }
-  });
-}
-function closeModalRoot(){ const root = document.getElementById('modalRoot'); root.style.display='none'; root.innerHTML=''; }
-
-/* Autocomplete Logic */
-let activeSuggestionIndex = -1; // For keyboard navigation
-
-function setupAutocomplete(inputElement, suggestionsListElement, stateKey, hiddenCcInput, hiddenTypeInput) {
-  let debounceTimeout;
-  const targetState = searchState[stateKey];
-
-  const updateHiddenFields = (suggestion) => {
-    if (suggestion) {
-      hiddenCcInput.value = suggestion.country_code || '';
-      hiddenTypeInput.value = suggestion.type || '';
-      targetState.val = suggestion.name;
-      targetState.cc = suggestion.country_code;
-      targetState.type = suggestion.type;
-    } else {
-      hiddenCcInput.value = '';
-      hiddenTypeInput.value = '';
-      targetState.val = inputElement.value; // Store whatever is typed if no suggestion is picked
-      targetState.cc = '';
-      targetState.type = '';
+    },
+    async add(payload) {
+      try {
+        const r = await fetch(WORKER_URL + ADD_ROUTE, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if (!r.ok) {
+          const errorData = await r.json().catch(() => ({ message: 'Unknown error' }));
+          console.error(`API Error (add): ${r.statusText} (${r.status}) - ${errorData.message}`);
+          return { status:'error', message: errorData.message || `Server error: ${r.statusText}` };
+        }
+        return await r.json();
+      } catch (e) {
+        console.error("API Error (add):", e);
+        return { status:'error', message:String(e) };
+      }
+    },
+    async close(id) {
+      try {
+        const r = await fetch(WORKER_URL + CLOSE_ROUTE, {
+          method: 'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ id })
+        });
+        if (!r.ok) {
+          const errorText = await r.text();
+          console.error(`API Error (close): ${r.statusText} (${r.status}) - ${errorText}`);
+          return { status:'error', message: `Server error: ${r.statusText}` };
+        }
+        return await r.json();
+      } catch (e) {
+        console.error("API Error (close):", e);
+        return { status:'error', message:String(e) };
+      }
+    },
+    async searchLocations(query) {
+      if (!query) return [];
+      // Ensure the query parameter name matches your backend (q=)
+      const params = new URLSearchParams({ q: query }); 
+      const url = WORKER_URL + SEARCH_LOCATIONS_ROUTE + '?' + params.toString();
+      try {
+        const r = await fetch(url);
+        if (!r.ok) {
+            const errorText = await r.text();
+            console.error(`Location search failed: ${r.statusText} (${r.status}) - ${errorText}`);
+            return [];
+        }
+        return await r.json();
+      } catch (e) {
+        console.error("API Error (searchLocations):", e);
+        return [];
+      }
     }
   };
 
-  inputElement.addEventListener('input', () => {
-    clearTimeout(debounceTimeout);
-    targetState.val = inputElement.value; // Update state immediately for input
-    updateHiddenFields(null); // Clear hidden fields if typing
-    suggestionsListElement.style.display = 'none';
-    activeSuggestionIndex = -1;
+  /* --- UI HELPERS --- */
+  function showToast(text, {auto=2200, background='var(--success)', type='success'}={}) {
+    const root = document.getElementById('toastRoot');
+    const toastElement = document.createElement('div');
+    toastElement.className = `toast ${type}`;
+    toastElement.style.background = background;
+    toastElement.textContent = text;
+    root.appendChild(toastElement);
 
-    if (inputElement.value.length < 2) {
+    if (auto > 0) {
+      setTimeout(() => {
+        toastElement.remove(); // Remove the specific toast
+      }, auto);
+    }
+  }
+
+  function showSuccessModal(id) {
+    const root = document.getElementById('successRoot');
+    root.style.display = 'block';
+    root.innerHTML = `
+      <div class="modal-backdrop success-modal" role="dialog" aria-modal="true">
+        <div class="modal">
+          <h3 style="margin-top:0;color:var(--success)">✔ Request created</h3>
+          <p style="margin:8px 0 14px">Your request was submitted successfully. Save this ID to close the request later.</p>
+          <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:12px">
+            <div style="background:#fff;padding:10px 14px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.04)">${id}</div>
+            <button id="copyId" class="btn ghost copy-btn">Copy ID</button>
+          </div>
+          <div style="display:flex;justify-content:center;gap:8px">
+            <button id="closeSuccess" class="btn ghost">Close</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('copyId').addEventListener('click', async ()=>{
+      try {
+        await navigator.clipboard.writeText(id);
+        showToast('ID copied to clipboard', {auto:1600});
+      } catch (e) {
+        showToast('Could not copy', {auto:1600, background: 'var(--error)', type:'error'});
+      }
+    });
+    document.getElementById('closeSuccess').addEventListener('click', ()=>{
+      root.style.display = 'none';
+      root.innerHTML = '';
+    });
+  }
+
+  function cleanPhoneForWa(phone) {
+    if (!phone) return '';
+    let p = phone.toString().trim();
+    p = p.replace(/\s+/g,'');
+    p = p.replace(/[^\d]/g,'');
+    return p;
+  }
+
+  function groupByDate(items){
+    const map = {};
+    items.forEach(it=>{
+      const dp = it.datepickup || it.datepickup_clean
+      ? new Date(it.datepickup || it.datepickup_clean).toISOString().slice(0,10)
+      : 'no-date';
+      if (!map[dp]) map[dp]=[];
+      map[dp].push(it);
+    });
+    const sortedKeys = Object.keys(map).sort();
+    const ordered = {};
+    sortedKeys.forEach(k=>ordered[k]=map[k]);
+    return ordered;
+  }
+
+  function renderGrouped(list){
+    const root = document.getElementById('resultsRoot');
+    root.innerHTML = '';
+    if (!Array.isArray(list) || list.length === 0) {
+      root.innerHTML = '<div class="small-muted">No open requests found.</div>';
       return;
     }
-
-    debounceTimeout = setTimeout(async () => {
-      const results = await api.searchLocations(inputElement.value);
-      displaySuggestions(results);
-    }, 300); // Debounce for 300ms
-  });
-
-  inputElement.addEventListener('keydown', (e) => {
-    const items = Array.from(suggestionsListElement.children);
-    if (items.length === 0) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
-      highlightSuggestion(items);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
-      highlightSuggestion(items);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (activeSuggestionIndex > -1) {
-        items[activeSuggestionIndex].click();
-      } else {
-        // If Enter is pressed without selecting from suggestions, trigger form submit (if this is a search input)
-        if (inputElement.form.id === 'searchForm') {
-          doSearch();
-        } 
-        // For add form, no explicit action needed here, form submission is handled by overall form listener
-      }
-    } else if (e.key === 'Escape') {
-      suggestionsListElement.style.display = 'none';
-      activeSuggestionIndex = -1;
-    }
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!inputElement.parentElement.contains(e.target)) {
-      suggestionsListElement.style.display = 'none';
-      activeSuggestionIndex = -1;
-    }
-  });
-
-  const displaySuggestions = (suggestions) => {
-    suggestionsListElement.innerHTML = '';
-    if (suggestions && suggestions.length > 0) {
-      suggestions.forEach((suggestion, index) => {
-        const li = document.createElement('li');
-        li.innerHTML = `<span>${suggestion.name}</span> <span class="muted-text">${suggestion.country_name || suggestion.country_code || ''}</span>`;
-        li.addEventListener('click', () => {
-          inputElement.value = suggestion.name;
-          updateHiddenFields(suggestion);
-          suggestionsListElement.style.display = 'none';
-          activeSuggestionIndex = -1;
+    const grouped = groupByDate(list);
+    Object.keys(grouped).forEach(dateKey=>{
+      const group = grouped[dateKey];
+      const h = document.createElement('div');
+      h.className = 'date-group';
+      const pretty = dateKey==='no-date' ? 'No date' : (new Date(dateKey)).toLocaleDateString(undefined, { weekday:'long', day:'numeric', month:'short' });
+      h.innerHTML = `<div class="date-header">${pretty}</div>`;
+      root.appendChild(h);
+      
+      group.forEach(item=>{
+        const ticket = document.createElement('div');
+        ticket.className = 'ticket';
+        let typeLabel = '';
+        if (item.type) { 
+          // Capitalize first letter
+          typeLabel = item.type.charAt(0).toUpperCase() + item.type.slice(1); 
+        }
+        
+        const from = item.from_loc || item.from || ''; // Use from_loc for display consistency
+        const to = item.to_loc || item.to || '';      // Use to_loc for display consistency
+        const name = item.name || '—';
+        const mobile = item.mobile || '';
+        const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
+        const cleanMobile = cleanPhoneForWa(mobile);
+        
+        ticket.innerHTML = `
+          <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${name}">
+            <div style="min-width:0">
+              <div class="route">${from} → ${to} ${typeLabel ? `<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${typeLabel}</small>` : ''}</div>
+              <div class="meta">${name} • <span class="small-muted">${mobile || ''}</span></div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <button class="whatsapp-btn" data-wa="${cleanMobile}" title="Contact on WhatsApp">
+                <svg class="wa-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M20.5 3.5A11.9 11.9 0 0 0 12 1.1 11.9 11.9 0 0 0 3.5 3.5 11.9 11.9 0 0 0 1.1 12c0 2.2.6 4.3 1.8 6.2L1 23l4.1-1.3A11.9 11.9 0 0 0 12 22.9h.1c2.2 0 4.3-.6 6.2-1.8A11.9 11.9 0 0 0 22.9 12 11.9 11.9 0 0 0 20.5 3.5zM12 20c-1.8 0-3.5-.5-5-1.5l-.4-.2-2.4.8.8-2.3-.2-.3A8 8 0 1 1 20 12 8 8 0 0 1 12 20z"/><path fill="#fff" d="M17.2 14.2c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.3.3-1 1-.9 1.2.1.3 1.4 2.2 3 3.1 1.7.9 2 .7 2.3.6.3-.1.9-.4 1-1 .1-.5.3-1 .2-1.1-.1-.1-.3-.2-.6-.3z"/></svg>
+                <span style="font-size:13px">WhatsApp</span>
+              </button>
+            </div>
+          </div>
+          <div class="price">${price}</div>
+        `;
+        ticket.querySelector('.ticket-left').addEventListener('click', ()=>openDetail(item));
+        ticket.querySelector('.ticket-left').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
+        ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          const wa = ev.currentTarget.dataset.wa || '';
+          if (!wa) { showToast('No phone number', {background: 'var(--error)', type:'error'}); return; }
+          window.open('https://wa.me/' + wa, '_blank');
         });
-        suggestionsListElement.appendChild(li);
+        document.getElementById('resultsRoot').appendChild(ticket);
       });
-      suggestionsListElement.style.display = 'block';
-    } else {
-      suggestionsListElement.style.display = 'none';
-    }
-  };
+    });
+  }
 
-  const highlightSuggestion = (items) => {
-    items.forEach((item, index) => {
-      if (index === activeSuggestionIndex) {
-        item.classList.add('active');
-        item.scrollIntoView({ block: 'nearest' });
+  function openDetail(item){
+    const root = document.getElementById('modalRoot');
+    root.style.display = 'block';
+    const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
+    const created = item.createdat ? new Date(item.createdat).toLocaleString() : '';
+    
+    const fromDisplay = item.from_loc || item.from || '—'; // Use from_loc for display consistency
+    const toDisplay = item.to_loc || item.to || '—';      // Use to_loc for display consistency
+    const typeDisplay = item.type ? (item.type.charAt(0).toUpperCase() + item.type.slice(1)) : '—'; // Capitalize
+    
+    root.innerHTML = `
+      <div class="modal-backdrop" role="dialog" aria-modal="true">
+        <div class="modal">
+          <h3 style="margin-top:0">${fromDisplay} → ${toDisplay}</h3>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="flex:1">
+              <p><strong>${item.name || '—'}</strong></p>
+              <p class="small-muted">Type: ${typeDisplay}</p>
+              <p class="small-muted">Date: ${item.datepickup || '—'}</p>
+              <p class="small-muted">Phone: ${item.mobile || '—'}</p>
+              <p class="small-muted">Email: ${item.email || '—'}</p>
+              <p style="margin-top:8px">${item.additionalinfo || ''}</p>
+            </div>
+            <div style="width:160px;text-align:right">
+              <div style="font-size:14px;color:var(--muted)">Price</div>
+              <div style="font-weight:800;font-size:18px">${price}</div>
+              <div style="margin-top:14px;color:var(--muted);font-size:12px">${created}</div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" id="closeDetailBtn" class="btn ghost">Close</button>
+            <button type="button" id="closeRequestBtn" class="btn" style="background:var(--error)">Close Request</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('closeDetailBtn').addEventListener('click', closeModalRoot);
+    document.getElementById('closeRequestBtn').addEventListener('click', async ()=>{
+      const confirmId = prompt('To confirm closing, enter the request ID:');
+      if (!confirmId || confirmId !== item.id) { showToast('Cancelled or ID mismatch', {background: 'var(--error)', type:'error'}); return; }
+      showToast('Closing request...');
+      const res = await api.close(item.id);
+      if (res && res.status === 'ok') {
+        showToast('Request closed', {auto:1800});
+        closeModalRoot();
+        await doSearch(); // refresh
       } else {
-        item.classList.remove('active');
+        showToast('Failed closing: ' + (res?.message || 'error'), {auto:3000, background: 'var(--error)', type:'error'});
       }
     });
-  };
-}
+  }
+  function closeModalRoot(){ const root = document.getElementById('modalRoot'); root.style.display='none'; root.innerHTML=''; }
+
+  /* Autocomplete Logic */
+  let activeSuggestionIndex = -1; // For keyboard navigation
+
+  function setupAutocomplete(inputElement, suggestionsListElement, stateKey, hiddenCcInput, hiddenTypeInput) {
+    let debounceTimeout;
+    const targetState = searchState[stateKey];
+
+    const updateHiddenFields = (suggestion) => {
+      if (suggestion) {
+        hiddenCcInput.value = suggestion.country_code || '';
+        hiddenTypeInput.value = suggestion.type || '';
+        targetState.val = suggestion.name;
+        targetState.cc = suggestion.country_code;
+        targetState.type = suggestion.type;
+      } else {
+        // If no suggestion is picked, store current input value and clear other fields
+        hiddenCcInput.value = '';
+        hiddenTypeInput.value = '';
+        targetState.val = inputElement.value; // Store whatever is typed if no suggestion is picked
+        targetState.cc = '';
+        targetState.type = '';
+      }
+    };
+
+    inputElement.addEventListener('input', () => {
+      clearTimeout(debounceTimeout);
+      targetState.val = inputElement.value; // Update state immediately for input
+      updateHiddenFields(null); // Clear hidden fields if typing
+      suggestionsListElement.style.display = 'none';
+      activeSuggestionIndex = -1;
+
+      if (inputElement.value.length < 2) {
+        return;
+      }
+
+      debounceTimeout = setTimeout(async () => {
+        const results = await api.searchLocations(inputElement.value);
+        displaySuggestions(results);
+      }, 300); // Debounce for 300ms
+    });
+
+    inputElement.addEventListener('keydown', (e) => {
+      const items = Array.from(suggestionsListElement.children);
+      if (items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
+        highlightSuggestion(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
+        highlightSuggestion(items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeSuggestionIndex > -1) {
+          items[activeSuggestionIndex].click();
+        } else {
+          // If Enter is pressed without selecting from suggestions, trigger form submit (if this is a search input)
+          if (inputElement.form.id === 'searchForm') {
+            doSearch();
+          }
+          // For add form, no explicit action needed here, form submission is handled by overall form listener
+        }
+      } else if (e.key === 'Escape') {
+        suggestionsListElement.style.display = 'none';
+        activeSuggestionIndex = -1;
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      // Check if the click is outside the input and its suggestions list
+      if (!inputElement.parentElement.contains(e.target)) {
+        suggestionsListElement.style.display = 'none';
+        activeSuggestionIndex = -1;
+      }
+    });
+
+    const displaySuggestions = (suggestions) => {
+      suggestionsListElement.innerHTML = '';
+      if (suggestions && suggestions.length > 0) {
+        suggestions.forEach((suggestion, index) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span>${suggestion.name}</span> <span class="muted-text">${suggestion.country_name || suggestion.country_code || ''}</span>`;
+          li.addEventListener('click', () => {
+            inputElement.value = suggestion.name;
+            updateHiddenFields(suggestion);
+            suggestionsListElement.style.display = 'none';
+            activeSuggestionIndex = -1;
+          });
+          suggestionsListElement.appendChild(li);
+        });
+        suggestionsListElement.style.display = 'block';
+      } else {
+        suggestionsListElement.style.display = 'none';
+      }
+    };
+
+    const highlightSuggestion = (items) => {
+      items.forEach((item, index) => {
+        if (index === activeSuggestionIndex) {
+          item.classList.add('active');
+          item.scrollIntoView({ block: 'nearest' });
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    };
+  }
 
 
-/* Add request modal */
-function openAddModal(){
-  const root = document.getElementById('modalRoot');
-  root.style.display = 'block';
-  root.innerHTML = `
-    <div class="modal-backdrop" role="dialog" aria-modal="true">
-      <div class="modal">
-        <h3 style="margin-top:0">Submit a Request</h3>
-        <form id="addForm">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="rname">Your name</label>
-              <input id="rname" name="name" type="text" required />
-            </div>
-            <div class="form-group">
-              <label for="rtype">Request type</label>
-              <select id="rtype" name="type" required>
-                <option value="shipper">Shipper (I want to send)</option>
-                <option value="traveller">Traveller (I will carry)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="rfrom">From</label>
+  /* Add request modal */
+  function openAddModal(){
+    const root = document.getElementById('modalRoot');
+    root.style.display = 'block';
+    root.innerHTML = `
+      <div class="modal-backdrop" role="dialog" aria-modal="true">
+        <div class="modal">
+          <h3 style="margin-top:0">Submit a Request</h3>
+          <form id="addForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="rname">Your name</label>
+                <input id="rname" name="name" type="text" required />
+              </div>
+              <div class="form-group">
+                <label for="rtype">Request type</label>
+                <select id="rtype" name="type" required>
+                  <option value="shipper">Shipper (I want to send)</option>
+                  <option value="traveller">Traveller (I will carry)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="rfrom">From</label>
                 <div class="autocomplete-wrapper">
                   <input id="rfrom" name="from" class="input" type="text" placeholder="City or Country" aria-label="From" autocomplete="off" required />
                   <ul id="suggestionsAddFrom" class="suggestions-list"></ul>
                   <input type="hidden" id="rfrom_cc" name="from_country" />
                   <input type="hidden" id="rfrom_type" name="from_type" />
                 </div>
-            </div>
-            <div class="form-group">
-              <label for="rto">To</label>
+              </div>
+              <div class="form-group">
+                <label for="rto">To</label>
                 <div class="autocomplete-wrapper">
                   <input id="rto" name="to" class="input" type="text" placeholder="City or Country" aria-label="To" autocomplete="off" required />
                   <ul id="suggestionsAddTo" class="suggestions-list"></ul>
                   <input type="hidden" id="rto_cc" name="to_country" />
                   <input type="hidden" id="rto_type" name="to_type" />
                 </div>
+              </div>
+              <div class="form-group">
+                <label for="rdate">Pickup date</label>
+                <input id="rdate" name="datepickup" type="date" required />
+              </div>
+              <div class="form-group">
+                <label for="rprice">Price per kg (€) — optional</label>
+                <input id="rprice" name="price_per_kg" type="number" step="0.01" min="0" placeholder="e.g. 4.50" />
+              </div>
+              <div class="form-group">
+                <label for="rmobile">Mobile (optional)</label>
+                <input id="rmobile" name="mobile" type="tel" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label for="remail">Email (optional)</label>
+                <input id="remail" name="email" type="email" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label for="rnotes">Additional info (optional)</label>
+                <textarea id="rnotes" name="additionalinfo" placeholder="Any notes (fragile, size, pickup location, ... )"></textarea>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="rdate">Pickup date</label>
-              <input id="rdate" name="datepickup" type="date" required />
-            </div>
-            <div class="form-group">
-              <label for="rprice">Price per kg (€) — optional</label>
-              <input id="rprice" name="price_per_kg" type="number" step="0.01" min="0" placeholder="e.g. 4.50" />
-            </div>
-            <div class="form-group">
-              <label for="rmobile">Mobile (optional)</label>
-              <input id="rmobile" name="mobile" type="tel" />
-            </div>
-            <div class="form-group" style="grid-column:1/-1">
-              <label for="remail">Email (optional)</label>
-              <input id="remail" name="email" type="email" />
-            </div>
-            <div class="form-group" style="grid-column:1/-1">
-              <label for="rnotes">Additional info (optional)</label>
-              <textarea id="rnotes" name="additionalinfo" placeholder="Any notes (fragile, size, pickup location, ... )"></textarea>
-            </div>
-          </div>
 
-          <div class="modal-actions">
-            <button type="button" id="cancelAdd" class="btn ghost">Cancel</button>
-            <button type="submit" class="btn">Submit Request</button>
-          </div>
-        </form>
+            <div class="modal-actions">
+              <button type="button" id="cancelAdd" class="btn ghost">Cancel</button>
+              <button type="submit" class="btn">Submit Request</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-  `;
-  document.getElementById('cancelAdd').addEventListener('click', ()=>{ closeModalRoot(); });
-  document.getElementById('addForm').addEventListener('submit', handleAddSubmit);
+    `;
+    document.getElementById('cancelAdd').addEventListener('click', ()=>{ closeModalRoot(); });
+    document.getElementById('addForm').addEventListener('submit', handleAddSubmit);
 
-  // Setup autocomplete for add modal fields AFTER they are rendered
-  setupAutocomplete(
-    document.getElementById('rfrom'),
-    document.getElementById('suggestionsAddFrom'),
-    'addFrom',
-    document.getElementById('rfrom_cc'),
-    document.getElementById('rfrom_type')
-  );
-  setupAutocomplete(
-    document.getElementById('rto'),
-    document.getElementById('suggestionsAddTo'),
-    'addTo',
-    document.getElementById('rto_cc'),
-    document.getElementById('rto_type')
-  );
-}
-
-/* submit add */
-async function handleAddSubmit(e){
-  e.preventDefault();
-  const f = new FormData(e.target);
-  const obj = Object.fromEntries(f.entries());
-  
-  // Apply location data from searchState for add form
-  obj.from = searchState.addFrom.val;
-  obj.from_country = searchState.addFrom.cc;
-  obj.from_type = searchState.addFrom.type;
-
-  obj.to = searchState.addTo.val;
-  obj.to_country = searchState.addTo.cc;
-  obj.to_type = searchState.addTo.type;
-
-  // if price empty -> null
-  if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
-  
-  showToast('Submitting...');
-  const res = await api.add(obj);
-  if (res && res.status === 'ok') {
-    showSuccessModal(res.id);
-    closeModalRoot();
-    await doSearch();
-  } else {
-    showToast('Submit failed: ' + (res?.message || 'network'), {auto:3500, background: '#ef4444'});
-  }
-}
-
-/* search */
-async function doSearch(){
-  const type = document.getElementById('searchType').value;
-  const fromValue = searchState.from.val; // Use value from state
-  const fromCc = searchState.from.cc;
-  const fromType = searchState.from.type;
-
-  const toValue = searchState.to.val;     // Use value from state
-  const toCc = searchState.to.cc;
-  const toType = searchState.to.type;
-
-  const date = document.getElementById('searchDate').value;
-
-  showToast('Searching...', {auto:900});
-
-  const data = await api.list({
-    type,
-    from: fromValue,
-    from_country: fromCc,
-    from_type: fromType,
-    to: toValue,
-    to_country: toCc,
-    to_type: toType,
-    datepickup: date
-  });
-
-  if (!Array.isArray(data)) {
-    showToast('Error loading results', {auto:3000, background: '#ef4444'});
-    document.getElementById('resultsRoot').innerHTML = '<div class="small-muted">Failed to load results.</div>';
-    return;
+    // Setup autocomplete for add modal fields AFTER they are rendered
+    setupAutocomplete(
+      document.getElementById('rfrom'),
+      document.getElementById('suggestionsAddFrom'),
+      'addFrom',
+      document.getElementById('rfrom_cc'),
+      document.getElementById('rfrom_type')
+    );
+    setupAutocomplete(
+      document.getElementById('rto'),
+      document.getElementById('suggestionsAddTo'),
+      'addTo',
+      document.getElementById('rto_cc'),
+      document.getElementById('rto_type')
+    );
   }
 
-  renderGrouped(data);
-}
+  /* submit add */
+  async function handleAddSubmit(e){
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const obj = Object.fromEntries(f.entries());
+    
+    // Apply location data from searchState for add form
+    // The setupAutocomplete function already updates searchState.addFrom and searchState.addTo
+    // So we just need to pull those values into the payload
+    obj.from = searchState.addFrom.val;
+    obj.from_country = searchState.addFrom.cc;
+    obj.from_type = searchState.addFrom.type;
 
-/* initial wiring */
-document.getElementById('openAdd').addEventListener('click', openAddModal);
-document.getElementById('doSearch').addEventListener('click', (e)=>{ e.preventDefault(); doSearch(); });
+    obj.to = searchState.addTo.val;
+    obj.to_country = searchState.addTo.cc;
+    obj.to_type = searchState.addTo.type;
 
-// Initial setup for the main search bar autocompletes
-setupAutocomplete(
-  document.getElementById('searchFrom'),
-  document.getElementById('suggestionsSearchFrom'),
-  'from',
-  document.getElementById('searchFrom_cc'),
-  document.getElementById('searchFrom_type')
-);
+    // if price empty -> null
+    if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
+    
+    showToast('Submitting...');
+    const res = await api.add(obj);
+    if (res && res.status === 'ok') {
+      showSuccessModal(res.id);
+      closeModalRoot();
+      await doSearch();
+    } else {
+      showToast('Submit failed: ' + (res?.message || 'network'), {auto:3500, background: 'var(--error)', type:'error'});
+    }
+  }
 
-// Initial call to doSearch to load results on page load
-doSearch();
+  /* search */
+  async function doSearch(){
+    const type = document.getElementById('searchType').value;
+    const fromValue = searchState.from.val; // Use value from state
+    const fromCc = searchState.from.cc;
+    const fromType = searchState.from.type;
+
+    const toValue = searchState.to.val;      // Use value from state
+    const toCc = searchState.to.cc;
+    const toType = searchState.to.type;
+
+    const date = document.getElementById('searchDate').value;
+
+    showToast('Searching...', {auto:900});
+
+    const data = await api.list({
+      type,
+      from: fromValue,
+      from_country: fromCc,
+      from_type: fromType,
+      to: toValue,
+      to_country: toCc,
+      to_type: toType,
+      datepickup: date
+    });
+
+    if (!Array.isArray(data)) {
+      showToast('Error loading results', {auto:3000, background: 'var(--error)', type:'error'});
+      document.getElementById('resultsRoot').innerHTML = '<div class="small-muted">Failed to load results.</div>';
+      return;
+    }
+
+    renderGrouped(data);
+  }
+
+  /* initial wiring */
+  document.getElementById('openAdd').addEventListener('click', openAddModal);
+  document.getElementById('doSearch').addEventListener('click', (e)=>{ e.preventDefault(); doSearch(); });
+
+  // Initial setup for the main search bar autocompletes
+  setupAutocomplete(
+    document.getElementById('searchFrom'),
+    document.getElementById('suggestionsSearchFrom'),
+    'from', // State key for search bar's 'from' field
+    document.getElementById('searchFrom_cc'),
+    document.getElementById('searchFrom_type')
+  );
+
+  setupAutocomplete(
+    document.getElementById('searchTo'), // CRITICAL: This was missing previously
+    document.getElementById('suggestionsSearchTo'),
+    'to', // State key for search bar's 'to' field
+    document.getElementById('searchTo_cc'),
+    document.getElementById('searchTo_type')
+  );
+
+  // Initial call to doSearch to load results on page load
+  doSearch();
 </script>
-</body>
 </html>
