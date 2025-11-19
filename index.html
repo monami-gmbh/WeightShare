@@ -26,26 +26,15 @@
   .hero-inner{width:100%;max-width:980px;padding:18px}
   .hero-title{font-size:26px;margin:0 0 12px;font-weight:700}
   .search-bar{background:rgba(255,255,255,0.98);border-radius:12px;padding:12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 18px rgba(2,6,23,0.12);}
-  /* [Minimal change] Desktop: Consistent, wide "From" and "To" fields, even spacing, clean width */
-.search-bar {
-  gap: 12px; /* consistent gap between fields */
+  #searchType {
+  min-width: 140px;
 }
-
-.search-field {
-  flex: 1 1 0;  /* let them grow equally */
-  min-width: 0;
-}
-
-/* <select> and date input: fixed width */
-#searchType, #searchDate {
-  flex: 0 0 160px; /* or adjust to your preferred px */
-  min-width: 120px;
-}
-
-/* "From" and "To": take more space */
 #searchFrom, #searchTo {
-  flex: 1 1 0;  /* grow and shrink */
+  flex: 1 1 0;
   min-width: 0;
+}
+#searchDate {
+  min-width: 120px;
 }
 
 @media (max-width: 720px) {
