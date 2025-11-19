@@ -134,6 +134,40 @@
   opacity: 1 !important;
   color: inherit !important;
 }
+
+  /* New edit to Force mobile date input to behave EXACTLY like text input */
+@media (max-width: 720px) {
+  input.date,
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    height: 44px !important;
+    line-height: 44px !important;
+
+    font-size: 16px !important;
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+
+    /* Prevent built-in date icon from resizing the field */
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* Make sure all three fields stay equal and aligned */
+  .search-field {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .autocomplete-container {
+    width: 100%;
+  }
+}
   
 </style>
 </head>
