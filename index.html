@@ -149,41 +149,50 @@
 
 <section class="hero">
   <div class="hero-inner container">
-    <div class="hero-title">Send or transport parcels with travellers — faster and cheaper</div>
+    <div class="hero-title">
+      Send or transport parcels with travellers — faster and cheaper
+    </div>
     <form id="searchForm" class="search-bar" role="search" aria-label="Search transport requests">
-      <div class="search-field" style="min-width:200px;max-width:260px;">
-        <select id="searchType" class="select" aria-label="Request type">
+      <div class="search-fields-container" style="display:flex; gap:2px; flex-wrap:wrap; width:100%;">
+        <!-- Request Type -->
+        <select id="searchType" class="select" aria-label="Request type" style="flex:1; min-width:120px;">
           <option value="">Any type</option>
           <option value="shipper">Shipper (looking to send)</option>
           <option value="traveller">Traveller (offering transport)</option>
         </select>
-      </div>
 
-      <div class="search-field" style="flex:1; display:flex; gap:2px; flex-wrap:wrap;">
-        <div class="autocomplete-container" style="flex:1;">
-          <input id="searchFrom" class="input" type="text" placeholder="Leaving from (City or Country)" aria-label="From" />
+        <!-- From -->
+        <div class="autocomplete-container" style="flex:1; min-width:120px; position:relative;">
+          <input id="searchFrom" class="input" type="text" placeholder="Leaving from (City or Country)" aria-label="From" style="width:100%;" />
           <div id="acFromList" class="autocomplete-list hidden" role="listbox" aria-label="From suggestions"></div>
         </div>
-        <div class="autocomplete-container" style="flex:1;">
-          <input id="searchTo" class="input" type="text" placeholder="Going to (City or Country)" aria-label="To" />
+
+        <!-- To -->
+        <div class="autocomplete-container" style="flex:1; min-width:120px; position:relative;">
+          <input id="searchTo" class="input" type="text" placeholder="Going to (City or Country)" aria-label="To" style="width:100%;" />
           <div id="acToList" class="autocomplete-list hidden" role="listbox" aria-label="To suggestions"></div>
         </div>
-        <input id="searchDate" class="date" type="date" placeholder="When" aria-label="Date" />
-        <script>
-          if (window.innerWidth <= 720) {
-            const d = document.getElementById('searchDate');
-            d.type = 'text';
-            d.addEventListener('focus', function(){ this.type='date'; });
-            d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
-          }
-        </script>
+
+        <!-- Date -->
+        <input id="searchDate" class="date" type="date" placeholder="When" aria-label="Date" style="flex:1; min-width:120px;" />
       </div>
-      <div>
+
+      <div style="margin-top:8px;">
         <button id="doSearch" class="search-btn">Search</button>
       </div>
+
+      <script>
+        if (window.innerWidth <= 720) {
+          const d = document.getElementById('searchDate');
+          d.type = 'text';
+          d.addEventListener('focus', function(){ this.type='date'; });
+          d.addEventListener('blur', function(){ if(!this.value) this.type='text'; });
+        }
+      </script>
     </form>
   </div>
 </section>
+
 
 <main class="container">
   <h3 class="section-title">Open Requests</h3>
