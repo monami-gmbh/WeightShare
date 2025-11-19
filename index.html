@@ -377,7 +377,12 @@ function setupAutocomplete(inputId, listId) {
       div.innerHTML = `<strong>${escapeHtml(name)}</strong>${country ? ` <span class="muted">${escapeHtml(country)}</span>` : ''}${type ? ` <span class="muted">(${escapeHtml(type)})</span>` : ''}`;
       div.addEventListener('click', () => {
         selectItem(item, name);
+      // Save metadata on the input for later when performing search/add
+        if (it && it.country_code) input.dataset.country = it.country_code;
+        else if (it && it.country_name) input.dataset.country = it.country_name;
+        if (type) input.dataset.type = type;
         clearList();
+        input.focus();
       });
 
       list.appendChild(div);
