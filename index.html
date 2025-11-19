@@ -411,11 +411,15 @@ function setupAutocomplete(inputId, listId) {
       event.preventDefault();
       if (focusedIndex >= 0 && items[focusedIndex]) {
         const itemData = currentItems[focusedIndex];
-        const itemName = items[focusedIndex].innerText.trim();
-        selectItem(itemData, itemName);
+    
+        // Extract the NAME only (first <strong> tag text)
+        const strong = items[focusedIndex].querySelector("strong");
+        const cleanName = strong ? strong.innerText.trim() : "";
+    
+        selectItem(itemData, cleanName);
         clearList();
       }
-    } else if (event.key === 'Escape') {
+    }else if (event.key === 'Escape') {
       clearList();
     }
   });
