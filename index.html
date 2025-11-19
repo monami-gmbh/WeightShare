@@ -335,76 +335,100 @@ function setupAutocomplete(inputId, listId) {
     currentItems = [];
   }
 
+  function highlight(nodes, idx) {
+    nodes.forEach((node, i) => {
+      if (i === idx) {
+        node.classList.add('focused');
+        node.scrollIntoView({ block: 'nearest' });
+      } else {
+        node.classList.remove('focused');
+      }
+    });
+  }
+
   input.addEventListener('input', async () => {
     const q = input.value.trim();
     input.removeAttribute('data-country');
     input.removeAttribute('data-type');
 
-    if (q.length < 2) { clearList(); return; }
+    if (q.length < 2) {
+      clearList();
+      return;
+    }
 
     const results = await autoSearch(q);
     list.innerHTML = '';
     currentItems = results || [];
 
-    if (!currentItems.length) { clearList(); return; }
+    if (!currentItems.length) {
+      clearList();
+      return;
+    }
 
-    currentItems.forEach((it, idx) => {
-      // 'it' might be a string or an object; normalize:
-      const name = typeof it === 'string' ? it : (it.name || '');
-      const country = (it && (it.country_name || it.country_code)) ? (it.country_name || it.country_code) : '';
-      const type = (it && it.type) ? it.type : '';
+    currentItems.forEach((item, idx) => {
+      const name = typeof item === 'string' ? item : item.name || '';
+      const country = item?.country_name || item?.country_code || '';
+      const type = item?.type || '';
 
       const div = document.createElement('div');
       div.className = 'autocomplete-item';
-      div.setAttribute('role','option');
+      div.setAttribute('role', 'option');
       div.dataset.index = idx;
       div.innerHTML = `<strong>${escapeHtml(name)}</strong>${country ? ` <span class="muted">${escapeHtml(country)}</span>` : ''}${type ? ` <span class="muted">(${escapeHtml(type)})</span>` : ''}`;
       div.addEventListener('click', () => {
-        // Put only the human-friendly name into input
-        input.value = name;
-        // Save metadata on the input for later when performing search/add
-        if (it && it.country_code) input.dataset.country = it.country_code;
-        else if (it && it.country_name) input.dataset.country = it.country_name;
-        if (type) input.dataset.type = type;
+        selectItem(item, name);
         clearList();
-        input.focus();
       });
+
       list.appendChild(div);
     });
 
     list.classList.remove('hidden');
+    focusedIndex = 0; // Default to the first item when rendering suggestions
+    const items = list.querySelectorAll('.autocomplete-item');
+    highlight(items, focusedIndex);
   });
 
-  // keyboard navigation (Up/Down/Enter/Escape)
-  input.addEventListener('keydown', (ev) => {
-    if (list.classList.contains('hidden')) return;
+  input.addEventListener('keydown', (event) => {
     const items = list.querySelectorAll('.autocomplete-item');
     if (!items.length) return;
-    if (ev.key === 'ArrowDown') {
-      ev.preventDefault();
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
       focusedIndex = Math.min(focusedIndex + 1, items.length - 1);
       highlight(items, focusedIndex);
-    } else if (ev.key === 'ArrowUp') {
-      ev.preventDefault();
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
       focusedIndex = Math.max(focusedIndex - 1, 0);
       highlight(items, focusedIndex);
-    } else if (ev.key === 'Enter') {
-      ev.preventDefault();
-      if (focusedIndex >= 0 && items[focusedIndex]) items[focusedIndex].click();
-    } else if (ev.key === 'Escape') {
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      if (focusedIndex >= 0 && items[focusedIndex]) {
+        const itemData = currentItems[focusedIndex];
+        const itemName = items[focusedIndex].innerText.trim();
+        selectItem(itemData, itemName);
+        clearList();
+      }
+    } else if (event.key === 'Escape') {
       clearList();
     }
   });
 
-  function highlight(nodes, idx) {
-    nodes.forEach(n => n.classList.remove('focused'));
-    if (nodes[idx]) {
-      nodes[idx].classList.add('focused');
-      nodes[idx].scrollIntoView({ block: 'nearest' });
+  function selectItem(itemData, itemName) {
+    // This function handles what happens when an item is selected (via "Enter" or click).
+    input.value = itemName;
+
+    if (itemData && itemData.country_code) {
+      input.dataset.country = itemData.country_code;
+    } else if (itemData && itemData.country_name) {
+      input.dataset.country = itemData.country_name;
+    }
+    
+    if (itemData?.type) {
+      input.dataset.type = itemData.type;
     }
   }
 
-  // close when clicking outside
   document.addEventListener('click', (e) => {
     if (!list.contains(e.target) && e.target !== input) {
       clearList();
