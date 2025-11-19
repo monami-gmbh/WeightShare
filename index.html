@@ -330,6 +330,16 @@ function setupAutocomplete(inputId, listId) {
     focusedIndex = -1;
     currentItems = [];
   }
+  function highlight(n, idx) {
+    nodes.forEach((n, i) => {
+      if (i === idx) {
+        node.classList.add('focused');
+        node.scrollIntoView({ block: 'nearest' });
+      } else {
+        node.classList.remove('focused');
+      }
+    });
+  }
 
   input.addEventListener('input', async () => {
     const q = input.value.trim();
@@ -369,6 +379,8 @@ function setupAutocomplete(inputId, listId) {
     });
 
     list.classList.remove('hidden');
+    focusedIndex = 0;  // Default to first item
+    highlight(list.querySelectorAll('.autocomplete-item'), focusedIndex);
   });
 
   // keyboard navigation (Up/Down/Enter/Escape)
@@ -392,13 +404,6 @@ function setupAutocomplete(inputId, listId) {
     }
   });
 
-  function highlight(nodes, idx) {
-    nodes.forEach(n => n.classList.remove('focused'));
-    if (nodes[idx]) {
-      nodes[idx].classList.add('focused');
-      nodes[idx].scrollIntoView({ block: 'nearest' });
-    }
-  }
 
   // close when clicking outside
   document.addEventListener('click', (e) => {
@@ -408,6 +413,17 @@ function setupAutocomplete(inputId, listId) {
   });
 }
 
+ function escapeHtml(str) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+    };
+    return str.replace(/[&<>"']/g, (m) => map[m]);
+  } 
+  
 /* activate autocompletes for search fields */
 setupAutocomplete('searchFrom','acFromList');
 setupAutocomplete('searchTo','acToList');
