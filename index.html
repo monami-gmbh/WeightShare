@@ -387,7 +387,8 @@ function setupAutocomplete(inputId, listId) {
       highlight(items, focusedIndex);
     } else if (ev.key === 'Enter') {
       ev.preventDefault();
-      if (focusedIndex >= 0 && items[focusedIndex]) items[focusedIndex].click();
+      const items = list.querySelectorAll('.autocomplete-item');
+      if (items.length && focusedIndex >= 0) items[focusedIndex].click();
     } else if (ev.key === 'Escape') {
       clearList();
     }
@@ -400,6 +401,13 @@ function setupAutocomplete(inputId, listId) {
       nodes[idx].scrollIntoView({ block: 'nearest' });
     }
   }
+  
+  // update this to set focusedIndex=0 when list opens:
+  input.addEventListener('input', async () => {
+    // ...after generating list...
+    if (!currentItems.length) { clearList(); return; }
+    focusedIndex = 0;
+    highlight(list.querySelectorAll('.autocomplete-item'), focusedIndex);
 
   // close when clicking outside
   document.addEventListener('click', (e) => {
@@ -713,35 +721,43 @@ function setupSmallInlineAutocomplete(inputId, listId) {
   const input = document.getElementById(inputId);
   const list = document.getElementById(listId);
   let currentItems = [];
+  let focusedIndex = -1;
+  
+  function highlight(nodes, idx) {
+    nodes.forEach(n => n.classList.remove('focused'));
+    if (nodes[idx]) {
+      nodes[idx].classList.add('focused');
+      nodes[idx].scrollIntoView({ block: 'nearest' });
+    }
+  }
 
-  function clearList(){ list.innerHTML=''; list.classList.add('hidden'); currentItems=[]; }
+  function clearList(){ list.innerHTML=''; list.classList.add('hidden'); currentItems=[]; focusedIndex=-1; }
 
   input.addEventListener('input', async () => {
-    const q = input.value.trim();
-    input.removeAttribute('data-country'); input.removeAttribute('data-type');
-    if (q.length < 2) { clearList(); return; }
-    const results = await autoSearch(q);
-    list.innerHTML=''; currentItems = results || [];
-    if (!currentItems.length) { clearList(); return; }
-    currentItems.forEach((it, idx) => {
-      const name = typeof it === 'string' ? it : (it.name || '');
-      const country = (it && (it.country_name || it.country_code)) ? (it.country_name || it.country_code) : '';
-      const type = (it && it.type) ? it.type : '';
-      const div=document.createElement('div'); div.className='autocomplete-item';
-      div.innerHTML = `<strong>${escapeHtml(name)}</strong>${country ? ` <span class="muted">${escapeHtml(country)}</span>` : ''}${type?` <span class="muted">(${escapeHtml(type)})</span>` : ''}`;
-      div.addEventListener('click', () => {
-        input.value = name;
-        if (it && it.country_code) input.dataset.country = it.country_code;
-        else if (it && it.country_name) input.dataset.country = it.country_name;
-        if (type) input.dataset.type = type;
-        clearList();
-      });
-      list.appendChild(div);
-    });
-    list.classList.remove('hidden');
+    // ...
+    focusedIndex = 0;
+    highlight(list.querySelectorAll('.autocomplete-item'), focusedIndex);
   });
 
-  document.addEventListener('click', (e)=>{ if (!list.contains(e.target) && e.target !== input) clearList(); });
+  input.addEventListener('keydown', (ev) => {
+    if (list.classList.contains('hidden')) return;
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (!items.length) return;
+    if (ev.key === 'ArrowDown') {
+      ev.preventDefault();
+      focusedIndex = Math.min(focusedIndex + 1, items.length - 1);
+      highlight(items, focusedIndex);
+    } else if (ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      focusedIndex = Math.max(focusedIndex - 1, 0);
+      highlight(items, focusedIndex);
+    } else if (ev.key === 'Enter') {
+      ev.preventDefault();
+      if (focusedIndex >= 0 && items[focusedIndex]) items[focusedIndex].click();
+    } else if (ev.key === 'Escape') {
+      clearList();
+    }
+  });
 }
 
 /* handle add submit:
