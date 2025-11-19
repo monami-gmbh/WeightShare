@@ -180,17 +180,44 @@
   width: 100%;
   box-sizing: border-box;
 }
+/* --- Prevent iOS zoom inside the ADD REQUEST modal --- */
+@media (max-width: 720px) {
+  .modal input[type="text"],
+  .modal input[type="date"],
+  .modal input[type="tel"],
+  .modal input[type="email"],
+  .modal input[type="number"],
+  .modal select,
+  .modal textarea {
+    font-size: 16px !important;
+    height: 44px !important;
+    padding: 10px 12px !important;
+    -webkit-text-size-adjust: 100%;
+  }
 
-  #searchType {
-  min-width: 140px;
+  /* Fix date field in modal the same way as search bar */
+  .modal input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    line-height: 44px !important;
+    min-width: 0 !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* Ensure all modal fields align nicely */
+  .form-group {
+    width: 100%;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 }
-#searchFrom, #searchTo {
-  flex: 1 1 0;
-  min-width: 0;
-}
-#searchDate {
-  min-width: 120px;
-}
+
 </style>
 </head>
 <body>
