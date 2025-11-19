@@ -331,15 +331,6 @@ function setupAutocomplete(inputId, listId) {
     currentItems = [];
   }
 
-  function highlightItem(idx) {
-    const children = list.querySelectorAll('.autocomplete-item');
-    children.forEach(c => c.classList.remove('focused'));
-    if (children[idx]) {
-      children[idx].classList.add('focused');
-      focusedIndex = idx;
-    }
-  }
-
   input.addEventListener('input', async () => {
     const q = input.value.trim();
     input.removeAttribute('data-country');
@@ -354,6 +345,7 @@ function setupAutocomplete(inputId, listId) {
     if (!currentItems.length) { clearList(); return; }
 
     currentItems.forEach((it, idx) => {
+      // 'it' might be a string or an object; normalize:
       const name = typeof it === 'string' ? it : (it.name || '');
       const country = (it && (it.country_name || it.country_code)) ? (it.country_name || it.country_code) : '';
       const type = (it && it.type) ? it.type : '';
@@ -363,69 +355,22 @@ function setupAutocomplete(inputId, listId) {
       div.setAttribute('role','option');
       div.dataset.index = idx;
       div.innerHTML = `<strong>${escapeHtml(name)}</strong>${country ? ` <span class="muted">${escapeHtml(country)}</span>` : ''}${type ? ` <span class="muted">(${escapeHtml(type)})</span>` : ''}`;
-
       div.addEventListener('click', () => {
+        // Put only the human-friendly name into input
         input.value = name;
-
+        // Save metadata on the input for later when performing search/add
         if (it && it.country_code) input.dataset.country = it.country_code;
         else if (it && it.country_name) input.dataset.country = it.country_name;
         if (type) input.dataset.type = type;
-
         clearList();
         input.focus();
       });
-
       list.appendChild(div);
     });
 
     list.classList.remove('hidden');
-
-    // ⭐ NEW: Automatically highlight the first result
     highlightItem(0);
   });
-
-  // ⭐ NEW: Keyboard navigation + Enter selection
-  input.addEventListener('keydown', (e) => {
-    const children = list.querySelectorAll('.autocomplete-item');
-    if (!children.length) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      let next = focusedIndex + 1;
-      if (next >= children.length) next = 0;
-      highlightItem(next);
-    }
-
-    if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      let prev = focusedIndex - 1;
-      if (prev < 0) prev = children.length - 1;
-      highlightItem(prev);
-    }
-
-    if (e.key === 'Enter') {
-      if (focusedIndex >= 0 && currentItems[focusedIndex]) {
-        e.preventDefault();
-        const it = currentItems[focusedIndex];
-
-        const name = typeof it === "string" ? it : (it.name || "");
-        input.value = name;
-
-        if (it.country_code) input.dataset.country = it.country_code;
-        else if (it.country_name) input.dataset.country = it.country_name;
-
-        if (it.type) input.dataset.type = it.type;
-
-        clearList();
-      }
-    }
-
-    if (e.key === 'Escape') {
-      clearList();
-    }
-  });
-}
-
 
   // keyboard navigation (Up/Down/Enter/Escape)
   input.addEventListener('keydown', (ev) => {
