@@ -842,22 +842,6 @@ function openAddModal(){
 */
 async function handleAddSubmit(e) {
   e.preventDefault();
-    
-  // VALIDATION: User must select from autocomplete (no manual typing allowed)
-  const rfromEl = document.getElementById('rfrom');
-  const rtoEl = document.getElementById('rto');
-
-  if (!rfromEl.dataset.country) {
-    showToast("Please select a valid 'From' location from the list.", { auto: 2000 });
-    return;
-  }
-
-  if (!rtoEl.dataset.country) {
-    showToast("Please select a valid 'To' location from the list.", { auto: 2000 });
-    return;
-  }
-
-
   const f = new FormData(e.target);
   const obj = Object.fromEntries(f.entries());
 
