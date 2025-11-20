@@ -106,25 +106,34 @@
     .whatsapp-btn { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
   
     /* Mobile Fix: Country code + mobile input */
-    /* Make the phone row responsive */
-    .form-group .mobile-row,
-    .form-group .phone-row,
+     /* Ensure the phone row is horizontal */
+    .phone-row,
     .mobile-row {
-      display: flex;
+      display: flex !important;
       flex-direction: row !important;
-      gap: 6px;
+      gap: 8px;
+      align-items: center;
       width: 100%;
     }
-    
-    /* Fix width balancing */
+  
+    /* Country code select: fixed width */
     #rcountrycode {
-      width: 80px !important;
-      flex-shrink: 0 !important;
+      width: 90px !important;
+      min-width: 90px !important;
+      flex: 0 0 90px !important;
     }
-    
+  
+    /* Mobile number: takes remaining space */
     #rmobile {
       flex: 1 !important;
+      width: 100% !important;
       min-width: 0 !important;
+    }
+  
+    /* Override global "all inputs full width" rule */
+    .phone-row select,
+    .phone-row input {
+      width: auto !important;
     }
 
   }
