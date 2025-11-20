@@ -663,7 +663,16 @@ function renderGrouped(list){
       const from = item.from_loc || item.from || '';
       const to = item.to_loc || item.to || '';
       const name = item.name || '—';
-      const mobile = item.mobile || '';
+      let mobile = (item.mobile || '').trim();
+
+// Remove any non-digits
+mobile = mobile.replace(/\D+/g, '');
+
+// Remove leading zero IF it exists
+if (mobile.startsWith('0')) {
+    mobile = mobile.substring(1);
+}
+
       const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
       const cleanMobile = mobile.replace(/\D/g, "");
 
