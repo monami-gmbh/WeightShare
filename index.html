@@ -277,14 +277,14 @@
         <div class="autocomplete-container" style="flex:1;">
           <div class="input-wrapper">
             <input id="searchFrom" class="input" type="text" placeholder="Leaving from (City or Country)" aria-label="From" />
-            <button class="clear-btn" data-clear="searchFrom">×</button>
+            <button class="clear-btn" data-clear="searchFrom" type="button">×</button>
           </div>
           <div id="acFromList" class="autocomplete-list hidden" role="listbox" aria-label="From suggestions"></div>
         </div>
         <div class="autocomplete-container" style="flex:1;">
           <div class="input-wrapper">
             <input id="searchTo" class="input" type="text" placeholder="Going to (City or Country)" aria-label="To" />
-            <button class="clear-btn" data-clear="searchTo">×</button>
+            <button class="clear-btn" data-clear="searchTo" type="button">×</button>
           </div>
           <div id="acToList" class="autocomplete-list hidden" role="listbox" aria-label="To suggestions"></div>
         </div>
@@ -769,7 +769,7 @@ function openAddModal(){
               <label for="rfrom">From</label>
               <div class="autocomplete-container input-wrapper" style="position:relative;">
                 <input id="rfrom" name="from" type="text" required />
-                <button class="clear-btn" data-clear="rfrom">×</button>
+                <button class="clear-btn" data-clear="rfrom" type="button">×</button>
             
                 <!-- Autocomplete list -->
                 <div id="acRFrom"
@@ -783,7 +783,7 @@ function openAddModal(){
               <label for="rto">To</label>
               <div class="autocomplete-container input-wrapper" style="position:relative;">
                 <input id="rto" name="to" type="text" required />
-                <button class="clear-btn" data-clear="rto">×</button>
+                <button class="clear-btn" data-clear="rto" type="button">×</button>
             
                 <!-- Autocomplete list -->
                 <div id="acRTo"
