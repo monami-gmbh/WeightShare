@@ -842,36 +842,43 @@ function openAddModal(){
 */
 async function handleAddSubmit(e) {
   e.preventDefault();
-  const f = new FormData(e.target);
-  const obj = Object.fromEntries(f.entries());
 
-  // Ensure price null when omitted
-  if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
-
-  // try to attach country/type metadata: rfrom/rto inputs have dataset values if user clicked suggestion
+  // VALIDATION: enforce selecting from autocomplete list
   const rfromEl = document.getElementById('rfrom');
   const rtoEl = document.getElementById('rto');
 
-  if (rfromEl?.dataset?.country) { obj.from_country = rfromEl.dataset.country; obj.from_type = rfromEl.dataset.type || 'city'; }
-  if (rtoEl?.dataset?.country) { obj.to_country = rtoEl.dataset.country; obj.to_type = rtoEl.dataset.type || 'city'; }
+  if (!rfromEl.dataset.country) {
+    showToast("Please select a valid 'From' location from the list.", { auto: 2000 });
+    return;
+  }
 
-  // if missing metadata, try to resolve automatically (best-effort)
-  if ((!obj.from_country || !obj.from_type) && obj.from) {
-    const res = await autoSearch(obj.from.trim());
-    if (res && res.length) {
-      const best = res[0];
-      obj.from_country = best.country_code || best.country_name || obj.from_country || '';
-      obj.from_type = best.type || obj.from_type || 'city';
-    }
+  if (!rtoEl.dataset.country) {
+    showToast("Please select a valid 'To' location from the list.", { auto: 2000 });
+    return;
   }
-  if ((!obj.to_country || !obj.to_type) && obj.to) {
-    const res = await autoSearch(obj.to.trim());
-    if (res && res.length) {
-      const best = res[0];
-      obj.to_country = best.country_code || best.country_name || obj.to_country || '';
-      obj.to_type = best.type || obj.to_type || 'city';
-    }
-  }
+
+  const f = new FormData(e.target);
+  const obj = Object.fromEntries(f.entries());
+
+  // Ensure price null
+  if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
+
+  // we can now safely attach metadata (they must exist)
+  obj.from_country = rfromEl.dataset.country;
+  obj.from_type = rfromEl.dataset.type || 'city';
+
+  obj.to_country = rtoEl.dataset.country;
+  obj.to_type = rtoEl.dataset.type || 'city';
+
+  // remove auto-resolve logic (no longer needed)
+  // --- DELETE THIS PART ---
+  // if ((!obj.from_country || !obj.from_type) ...)
+  // if ((!obj.to_country || !obj.to_type) ...)
+  // -------------------------
+
+  // continue with your existing submit logic...
+}
+
 
   // validate required fields as backend expects
   const missing = [];
