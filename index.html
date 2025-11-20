@@ -106,35 +106,34 @@
     .whatsapp-btn { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
   
     /* Mobile Fix: Country code + mobile input */
-     /* Ensure the phone row is horizontal */
-    .phone-row,
-    .mobile-row {
-      display: flex !important;
-      flex-direction: row !important;
-      gap: 8px;
-      align-items: center;
-      width: 100%;
-    }
-  
-    /* Country code select: fixed width */
-    #rcountrycode {
-      width: 90px !important;
-      min-width: 90px !important;
-      flex: 0 0 90px !important;
-    }
-  
-    /* Mobile number: takes remaining space */
-    #rmobile {
-      flex: 1 !important;
-      width: 100% !important;
-      min-width: 0 !important;
-    }
-  
-    /* Override global "all inputs full width" rule */
-    .phone-row select,
-    .phone-row input {
-      width: auto !important;
-    }
+     /* Make the mobile row stay horizontal */
+      .mobile-wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        width: 100% !important;
+        align-items: center !important;
+      }
+    
+      /* Country code dropdown fixed width */
+      #rcode {
+        width: 90px !important;
+        min-width: 90px !important;
+        flex: 0 0 90px !important;
+      }
+    
+      /* Mobile number expands */
+      #rmobile {
+        flex: 1 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+      }
+    
+      /* Override the global modal rule forcing 100% width */
+      .mobile-wrapper select,
+      .mobile-wrapper input {
+        width: auto !important;
+      }
 
   }
   /* --- MOBILE OPTIMIZATION END --- */
