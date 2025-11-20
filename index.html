@@ -104,6 +104,26 @@
     .ticket-left > div:first-child { width: 100%; }
     .ticket-left > div:last-child { margin-left: 0; width: 100%; margin-top: 12px; }
     .whatsapp-btn { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
+  
+    /* Mobile Fix: Country code + mobile input */
+    #rcountrycode {
+      width: 85px !important;       /* smaller width */
+      flex-shrink: 0 !important;    /* do not shrink further */
+    }
+  
+    #rmobile {
+      flex: 1 !important;           /* take all remaining space */
+      min-width: 0 !important;      /* allow proper shrinking */
+    }
+  
+    /* Container row must stay horizontal */
+    .form-group > div {
+      display: flex;
+      flex-direction: row;
+      gap: 6px;
+      width: 100%;
+    }
+
   }
   /* --- MOBILE OPTIMIZATION END --- */
   .wa-icon{width:18px;height:18px;display:inline-block}
