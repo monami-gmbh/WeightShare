@@ -222,6 +222,29 @@
   }
 }
 
+ .input-wrapper {
+  position: relative;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  cursor: pointer;
+  color: #888;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  display: none; /* hidden until input has text */
+}
+
+.clear-btn:hover {
+  color: #000;
+}
+ 
 </style>
 </head>
 <body>
@@ -248,12 +271,14 @@
       </div>
 
       <div class="search-field" style="flex:1; display:flex; gap:8px; flex-wrap:wrap;">
-        <div class="autocomplete-container" style="flex:1;">
+        <div class="autocomplete-container input-wrapper" style="flex:1;">
           <input id="searchFrom" class="input" type="text" placeholder="Leaving from (City or Country)" aria-label="From" />
+          <button class="clear-btn" data-clear="searchFrom">×</button>
           <div id="acFromList" class="autocomplete-list hidden" role="listbox" aria-label="From suggestions"></div>
         </div>
-        <div class="autocomplete-container" style="flex:1;">
+        <div class="autocomplete-container input-wrapper" style="flex:1;">
           <input id="searchTo" class="input" type="text" placeholder="Going to (City or Country)" aria-label="To" />
+          <button class="clear-btn" data-clear="searchTo">×</button>
           <div id="acToList" class="autocomplete-list hidden" role="listbox" aria-label="To suggestions"></div>
         </div>
         <input id="searchDate" class="date" type="date" placeholder="When" aria-label="Date" />
@@ -455,6 +480,42 @@ function setupAutocomplete(inputId, listId) {
 /* activate autocompletes for search fields */
 setupAutocomplete('searchFrom','acFromList');
 setupAutocomplete('searchTo','acToList');
+
+
+ /* Add Clear Button (x) */
+  function enableClearButtons() {
+  document.querySelectorAll('.clear-btn').forEach(btn => {
+    const targetId = btn.dataset.clear;
+    const input = document.getElementById(targetId);
+
+    if (!input) return;
+
+    // Toggle X visibility
+    input.addEventListener('input', () => {
+      btn.style.display = input.value ? 'block' : 'none';
+    });
+
+    // Clear action
+    btn.addEventListener('click', () => {
+      input.value = '';
+      input.removeAttribute('data-country');
+      input.removeAttribute('data-type');
+      btn.style.display = 'none';
+
+      // Close autocomplete if open
+      const list = input.nextElementSibling;
+      if (list && list.classList.contains('autocomplete-list')) {
+        list.innerHTML = '';
+        list.classList.add('hidden');
+      }
+
+      input.focus();
+    });
+  });
+}
+
+// Activate after DOM loads
+document.addEventListener('DOMContentLoaded', enableClearButtons);
 
 /* =====================
    API helpers
@@ -699,6 +760,7 @@ function openAddModal(){
             <div class="form-group"><label for="rfrom">From</label>
               <div style="position:relative">
                 <input id="rfrom" name="from" type="text" required />
+                <button class="clear-btn" data-clear="rfrom">×</button>
                 <div id="acRFrom" class="autocomplete-list hidden" style="position:absolute;left:0;right:0;top:100%;z-index:1200"></div>
               </div>
             </div>
@@ -706,6 +768,7 @@ function openAddModal(){
             <div class="form-group"><label for="rto">To</label>
               <div style="position:relative">
                 <input id="rto" name="to" type="text" required />
+                <button class="clear-btn" data-clear="rto">×</button>
                 <div id="acRTo" class="autocomplete-list hidden" style="position:absolute;left:0;right:0;top:100%;z-index:1200"></div>
               </div>
             </div>
