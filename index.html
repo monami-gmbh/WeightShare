@@ -222,27 +222,30 @@
   }
 }
 
+/* Adding clear button X */  
  .input-wrapper {
   position: relative;
+  display: flex; 
+  align-items: center;
 }
-
+  
+.input-wrapper input {
+  padding-right: 32px !important; /* ensures text never hides behind the X */
+  width: 100%
+}
+  
 .clear-btn {
   position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  cursor: pointer;
-  color: #888;
+  right: 10px;
   background: none;
   border: none;
-  padding: 0;
-  line-height: 1;
-  display: none; /* hidden until input has text */
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.5;
 }
 
 .clear-btn:hover {
-  color: #000;
+  opacity: 1;
 }
  
 </style>
@@ -271,14 +274,18 @@
       </div>
 
       <div class="search-field" style="flex:1; display:flex; gap:8px; flex-wrap:wrap;">
-        <div class="autocomplete-container input-wrapper" style="flex:1;">
-          <input id="searchFrom" class="input" type="text" placeholder="Leaving from (City or Country)" aria-label="From" />
-          <button class="clear-btn" data-clear="searchFrom">×</button>
+        <div class="autocomplete-container" style="flex:1;">
+          <div class="input-wrapper">
+            <input id="searchFrom" class="input" type="text" placeholder="Leaving from (City or Country)" aria-label="From" />
+            <button class="clear-btn" data-clear="searchFrom">×</button>
+          </div>
           <div id="acFromList" class="autocomplete-list hidden" role="listbox" aria-label="From suggestions"></div>
         </div>
-        <div class="autocomplete-container input-wrapper" style="flex:1;">
-          <input id="searchTo" class="input" type="text" placeholder="Going to (City or Country)" aria-label="To" />
-          <button class="clear-btn" data-clear="searchTo">×</button>
+        <div class="autocomplete-container" style="flex:1;">
+          <div class="input-wrapper">
+            <input id="searchTo" class="input" type="text" placeholder="Going to (City or Country)" aria-label="To" />
+            <button class="clear-btn" data-clear="searchTo">×</button>
+          </div>
           <div id="acToList" class="autocomplete-list hidden" role="listbox" aria-label="To suggestions"></div>
         </div>
         <input id="searchDate" class="date" type="date" placeholder="When" aria-label="Date" />
@@ -482,8 +489,8 @@ setupAutocomplete('searchFrom','acFromList');
 setupAutocomplete('searchTo','acToList');
 
 
- /* Add Clear Button (x) */
-  function enableClearButtons() {
+/* Add Clear Button (x) */
+function enableClearButtons() {
   document.querySelectorAll('.clear-btn').forEach(btn => {
     const targetId = btn.dataset.clear;
     const input = document.getElementById(targetId);
@@ -502,9 +509,9 @@ setupAutocomplete('searchTo','acToList');
       input.removeAttribute('data-type');
       btn.style.display = 'none';
 
-      // Close autocomplete if open
-      const list = input.nextElementSibling;
-      if (list && list.classList.contains('autocomplete-list')) {
+      // Corrected: Find autocomplete list properly
+      const list = input.closest('.autocomplete-container').querySelector('.autocomplete-list');
+      if (list) {
         list.innerHTML = '';
         list.classList.add('hidden');
       }
@@ -516,6 +523,7 @@ setupAutocomplete('searchTo','acToList');
 
 // Activate after DOM loads
 document.addEventListener('DOMContentLoaded', enableClearButtons);
+
 
 /* =====================
    API helpers
@@ -757,19 +765,31 @@ function openAddModal(){
             <div class="form-group"><label for="rtype">Request type</label><select id="rtype" name="type" required><option value="shipper">Shipper (I want to send)</option><option value="traveller">Traveller (I will carry)</option></select></div>
 
             <!-- From/To fields: we also attach small autocomplete lists here -->
-            <div class="form-group"><label for="rfrom">From</label>
-              <div style="position:relative">
+            <div class="form-group">
+              <label for="rfrom">From</label>
+              <div class="autocomplete-container input-wrapper" style="position:relative;">
                 <input id="rfrom" name="from" type="text" required />
                 <button class="clear-btn" data-clear="rfrom">×</button>
-                <div id="acRFrom" class="autocomplete-list hidden" style="position:absolute;left:0;right:0;top:100%;z-index:1200"></div>
+            
+                <!-- Autocomplete list -->
+                <div id="acRFrom"
+                     class="autocomplete-list hidden"
+                     style="position:absolute; left:0; right:0; top:100%; z-index:1200;">
+                </div>
               </div>
             </div>
 
-            <div class="form-group"><label for="rto">To</label>
-              <div style="position:relative">
+            <div class="form-group">
+              <label for="rto">To</label>
+              <div class="autocomplete-container input-wrapper" style="position:relative;">
                 <input id="rto" name="to" type="text" required />
                 <button class="clear-btn" data-clear="rto">×</button>
-                <div id="acRTo" class="autocomplete-list hidden" style="position:absolute;left:0;right:0;top:100%;z-index:1200"></div>
+            
+                <!-- Autocomplete list -->
+                <div id="acRTo"
+                     class="autocomplete-list hidden"
+                     style="position:absolute; left:0; right:0; top:100%; z-index:1200;">
+                </div>
               </div>
             </div>
 
