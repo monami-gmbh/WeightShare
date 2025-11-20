@@ -811,6 +811,7 @@ function openAddModal(){
   // attach small autocomplete logic for rfrom / rto using same helper but custom IDs
   setupAutocomplete('rfrom','acRFrom');
   setupAutocomplete('rto','acRTo');
+  enableClearButtons();
 
   document.getElementById('cancelAdd').addEventListener('click',closeModalRoot);
   document.getElementById('addForm').addEventListener('submit', handleAddSubmit);
