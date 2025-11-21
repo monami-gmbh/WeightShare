@@ -270,7 +270,82 @@
 .clear-btn:hover {
   opacity: 1;
 }
- 
+
+  .ticket {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- Upper section --- */
+.ticket-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loc {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.route-line {
+  width: 70px;
+  height: 2px;
+  background: #1b4e66;
+  border-radius: 2px;
+}
+
+.type-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Price */
+.price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+/* --- Lower section --- */
+.ticket-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #eef1f4;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* WhatsApp button */
+.whatsapp-btn {
+  background: #25d366;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
 </style>
 </head>
 <body>
@@ -660,20 +735,33 @@ function renderGrouped(list){
       const cleanMobile = mobile.replace(/\D/g, "");
 
       ticket.innerHTML = `
-        <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
-          <div style="min-width:0">
-            <div class="route">${escapeHtml(from)} → ${escapeHtml(to)} ${typeLabel ? `<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${escapeHtml(typeLabel)}</small>` : ''}</div>
-            <div class="meta">${escapeHtml(name)}</div>
-          </div>
-          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-            <button class="whatsapp-btn" data-wa="${cleanMobile}" title="Contact on WhatsApp">
-              <svg class="wa-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M20.5 3.5A11.9 11.9 0 0 0 12 1.1 11.9 11.9 0 0 0 3.5 3.5 11.9 11.9 0 0 0 1.1 12c0 2.2.6 4.3 1.8 6.2L1 23l4.1-1.3A11.9 11.9 0 0 0 12 22.9h.1c2.2 0 4.3-.6 6.2-1.8A11.9 11.9 0 0 0 22.9 12 11.9 11.9 0 0 0 20.5 3.5zM12 20c-1.8 0-3.5-.5-5-1.5l-.4-.2-2.4.8.8-2.3-.2-.3A8 8 0 1 1 20 12 8 8 0 0 1 12 20z"/><path fill="#fff" d="M17.2 14.2c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.3.3-1 1-.9 1.2.1.3 1.4 2.2 3 3.1 1.7.9 2 .7 2.3.6.3-.1.9-.4 1-1 .1-.5.3-1 .2-1.1-.1-.1-.3-.2-.6-.3z"/></svg>
-              <span style="font-size:13px">WhatsApp</span>
-            </button>
-          </div>
+    
+      <!-- Upper section -->
+      <div class="ticket-top" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
+    
+        <div class="route">
+          <span class="loc">${escapeHtml(from)}</span>
+          <div class="route-line"></div>
+          <span class="loc">${escapeHtml(to)}</span>
+          ${typeLabel ? `<small class="type-label">• ${escapeHtml(typeLabel)}</small>` : ''}
         </div>
+    
         <div class="price">${escapeHtml(price)}</div>
-      `;
+      </div>
+    
+      <!-- Lower section -->
+      <div class="ticket-bottom">
+        <div class="user-info">
+          <span class="user-name">${escapeHtml(name)}</span>
+        </div>
+    
+        <button class="whatsapp-btn" data-wa="${cleanMobile}">
+          WhatsApp
+        </button>
+      </div>
+    
+    `;
+
 
       ticket.querySelector('.ticket-left').addEventListener('click', ()=>openDetail(item));
       ticket.querySelector('.ticket-left').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
