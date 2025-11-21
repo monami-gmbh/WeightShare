@@ -106,34 +106,26 @@
     .whatsapp-btn { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
   
     /* Mobile Fix: Country code + mobile input */
-     /* Make the mobile row stay horizontal */
-      .mobile-wrapper {
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 8px !important;
-        width: 100% !important;
-        align-items: center !important;
-      }
+    /* Make the phone row responsive */
+    .form-group .mobile-row,
+    .form-group .phone-row,
+    .mobile-row {
+      display: flex;
+      flex-direction: row !important;
+      gap: 6px;
+      width: 100%;
+    }
     
-      /* Country code dropdown fixed width */
-      #rcode {
-        width: 100px !important;
-        min-width: 100px !important;
-        flex: 0 0 100px !important;
-      }
+    /* Fix width balancing */
+    #rcountrycode {
+      width: 80px !important;
+      flex-shrink: 0 !important;
+    }
     
-      /* Mobile number expands */
-      #rmobile {
-        flex: 1 !important;
-        min-width: 0 !important;
-        width: 100% !important;
-      }
-    
-      /* Override the global modal rule forcing 100% width */
-      .mobile-wrapper select,
-      .mobile-wrapper input {
-        width: auto !important;
-      }
+    #rmobile {
+      flex: 1 !important;
+      min-width: 0 !important;
+    }
 
   }
   /* --- MOBILE OPTIMIZATION END --- */
@@ -624,23 +616,6 @@ function cleanPhoneForWa(phone) {
   return p;
 }
 
-/* =====================
-   Clean Phone number
-   =====================   */
-function formatDisplayPhone(country, mobile) {
-  // country code is already digits only
-  // mobile is guaranteed to be digits only
-  if (!country || !mobile) return '—';
-  // remove leading 0 (ONLY for display)
-  if (mobile.startsWith('0')) {
-      mobile = mobile.substring(1);
-  }
-
-  // return pretty format
-  return `+${country} ${mobile}`;
-}
-
-  
 /* grouping & rendering (unchanged logic) */
 function groupByDate(items){
   const map = {};
@@ -680,8 +655,7 @@ function renderGrouped(list){
       const from = item.from_loc || item.from || '';
       const to = item.to_loc || item.to || '';
       const name = item.name || '—';
-      const displayMobile = formatDisplayPhone(item.country_code, item.mobile);
-
+      const mobile = item.mobile || '';
       const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
       const cleanMobile = mobile.replace(/\D/g, "");
 
@@ -689,7 +663,7 @@ function renderGrouped(list){
         <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
           <div style="min-width:0">
             <div class="route">${escapeHtml(from)} → ${escapeHtml(to)} ${typeLabel ? `<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${escapeHtml(typeLabel)}</small>` : ''}</div>
-            <div class="meta">${escapeHtml(name)} •  <span class="small-muted">${escapeHtml(mobile || '')}</span></div>
+            <div class="meta">${escapeHtml(name)} • <span class="small-muted">${escapeHtml(mobile || '')}</span></div>
           </div>
           <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
             <button class="whatsapp-btn" data-wa="${cleanMobile}" title="Contact on WhatsApp">
@@ -733,7 +707,7 @@ function openDetail(item){
             <p><strong>${escapeHtml(item.name || '—')}</strong></p>
             <p class="small-muted">Type: ${escapeHtml((item.type || '—'))}</p>
             <p class="small-muted">Date: ${escapeHtml(item.datepickup || '—')}</p>
-            <p class="small-muted">Phone: ${escapeHtml(formatDisplayPhone(item.country_code, item.mobile))}</p>
+            <p class="small-muted">Phone: ${escapeHtml(item.mobile || '—')}</p>
             <p class="small-muted">Email: ${escapeHtml(item.email || '—')}</p>
             <p style="margin-top:8px">${escapeHtml((item.additionalinfo||'').replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''))}</p>
           </div>
