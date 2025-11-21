@@ -689,7 +689,7 @@ function renderGrouped(list){
         <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
           <div style="min-width:0">
             <div class="route">${escapeHtml(from)} → ${escapeHtml(to)} ${typeLabel ? `<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${escapeHtml(typeLabel)}</small>` : ''}</div>
-            <div class="meta">${escapeHtml(name)} • ${escapeHtml(formatDisplayPhone(item.country_code, item.mobile))}</div>
+            <div class="meta">${escapeHtml(name)} •  <span class="small-muted">${escapeHtml(mobile || '')}</span></div>
           </div>
           <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
             <button class="whatsapp-btn" data-wa="${cleanMobile}" title="Contact on WhatsApp">
