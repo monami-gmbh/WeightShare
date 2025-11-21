@@ -380,19 +380,6 @@ async function autoSearch(q) {
   }
 }
 
-function formatDisplayPhone(country, mobile) {
-  // country code is already digits only
-  // mobile is guaranteed to be digits only
-
-  // remove leading 0 (ONLY for display)
-  if (mobile.startsWith('0')) {
-      mobile = mobile.substring(1);
-  }
-
-  // return pretty format
-  return `+${country} ${mobile}`;
-}
-
 /**
  * Render suggestions into list and attach metadata to input when selected.
  * inputId: DOM id of input (e.g. "searchFrom")
@@ -637,6 +624,22 @@ function cleanPhoneForWa(phone) {
   return p;
 }
 
+/* =====================
+   Clean Phone number
+   ===================== */  
+function formatDisplayPhone(country, mobile) {
+  // country code is already digits only
+  // mobile is guaranteed to be digits only
+  if (!country || !mobile) return '—';
+  // remove leading 0 (ONLY for display)
+  if (mobile.startsWith('0')) {
+      mobile = mobile.substring(1);
+  }
+
+  // return pretty format
+  return `+${country} ${mobile}`;
+}
+  
 /* grouping & rendering (unchanged logic) */
 function groupByDate(items){
   const map = {};
