@@ -763,8 +763,8 @@ function renderGrouped(list){
     `;
 
 
-      ticket.querySelector('.ticket-left').addEventListener('click', ()=>openDetail(item));
-      ticket.querySelector('.ticket-left').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
+      ticket.querySelector('.ticket-top').addEventListener('click', ()=>openDetail(item));
+      ticket.querySelector('.ticket-top').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
       ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
         ev.stopPropagation();
         const wa = ev.currentTarget.dataset.wa || '';
