@@ -380,6 +380,19 @@ async function autoSearch(q) {
   }
 }
 
+function formatDisplayPhone(country, mobile) {
+  // country code is already digits only
+  // mobile is guaranteed to be digits only
+
+  // remove leading 0 (ONLY for display)
+  if (mobile.startsWith('0')) {
+      mobile = mobile.substring(1);
+  }
+
+  // return pretty format
+  return `+${country} ${mobile}`;
+}
+
 /**
  * Render suggestions into list and attach metadata to input when selected.
  * inputId: DOM id of input (e.g. "searchFrom")
@@ -663,15 +676,7 @@ function renderGrouped(list){
       const from = item.from_loc || item.from || '';
       const to = item.to_loc || item.to || '';
       const name = item.name || '—';
-      let mobile = (item.mobile || '').trim();
-
-// Remove any non-digits
-mobile = mobile.replace(/\D+/g, '');
-
-// Remove leading zero IF it exists
-if (mobile.startsWith('0')) {
-    mobile = mobile.substring(1);
-}
+      const displayMobile = formatDisplayPhone(item.country_code, item.mobile);
 
       const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
       const cleanMobile = mobile.replace(/\D/g, "");
@@ -680,7 +685,7 @@ if (mobile.startsWith('0')) {
         <div class="ticket-left" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
           <div style="min-width:0">
             <div class="route">${escapeHtml(from)} → ${escapeHtml(to)} ${typeLabel ? `<small style="font-weight:600;color:var(--muted);font-size:13px"> • ${escapeHtml(typeLabel)}</small>` : ''}</div>
-            <div class="meta">${escapeHtml(name)} • <span class="small-muted">${escapeHtml(mobile || '')}</span></div>
+            <div class="meta">${escapeHtml(name)} • <span class="mobile">${displayMobile}</span></div>
           </div>
           <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
             <button class="whatsapp-btn" data-wa="${cleanMobile}" title="Contact on WhatsApp">
@@ -724,7 +729,7 @@ function openDetail(item){
             <p><strong>${escapeHtml(item.name || '—')}</strong></p>
             <p class="small-muted">Type: ${escapeHtml((item.type || '—'))}</p>
             <p class="small-muted">Date: ${escapeHtml(item.datepickup || '—')}</p>
-            <p class="small-muted">Phone: ${escapeHtml(item.mobile || '—')}</p>
+            <p class="small-muted">Phone: ${escapeHtml(formatDisplayPhone(item.country_code, item.mobile))}</p>
             <p class="small-muted">Email: ${escapeHtml(item.email || '—')}</p>
             <p style="margin-top:8px">${escapeHtml((item.additionalinfo||'').replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''))}</p>
           </div>
