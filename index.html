@@ -283,24 +283,47 @@
 }
 
 /* --- Upper section --- */
-.ticket-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  width: 100%;
-}
-
 .route {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  position: relative;
+}
+
+/* FIXED graphic layout */
+.route-graphic {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: #1b4e66;
+  border-radius: 50%;
+}
+
+.route-line {
+  width: 80px;        /* FIXED length */
+  height: 3px;
+  background: #1b4e66;
+  border-radius: 999px;
+}
+
+/* Labels aligned under the endpoints */
+.route-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 120px;       /* MUST MATCH (dot + line + dot width) */
+  margin-top: 6px;
 }
 
 .loc {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
+  text-align: center;
 }
 
 /* Long centered rounded line */
@@ -746,17 +769,26 @@ function renderGrouped(list){
 
       ticket.innerHTML = `
       <!-- Upper section -->
-      <div class="ticket-top" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
-    
+      <div class="ticket-top" role="button" tabindex="0">
+
         <div class="route">
-          <span class="loc">${escapeHtml(from)}</span>
-          <div class="route-line"></div>
-          <span class="loc">${escapeHtml(to)}</span>
+          <div class="route-graphic">
+            <span class="dot"></span>
+            <span class="route-line"></span>
+            <span class="dot"></span>
+          </div>
+      
+          <div class="route-labels">
+            <span class="loc">${escapeHtml(from)}</span>
+            <span class="loc">${escapeHtml(to)}</span>
+          </div>
+      
           ${typeLabel ? `<small class="type-label">• ${escapeHtml(typeLabel)}</small>` : ''}
         </div>
-    
+      
         <div class="price">${escapeHtml(price)}</div>
       </div>
+
     
       <!-- Lower section -->
       <div class="ticket-bottom">
@@ -769,8 +801,8 @@ function renderGrouped(list){
     `;
 
 
-      ticket.querySelector('.ticket-top').addEventListener('click', ()=>openDetail(item));
-      ticket.querySelector('.ticket-top').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
+      ticket.querySelector('.ticket').addEventListener('click', ()=>openDetail(item));
+      ticket.querySelector('.ticket').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
       ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
         ev.stopPropagation();
         const wa = ev.currentTarget.dataset.wa || '';
