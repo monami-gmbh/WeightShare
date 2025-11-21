@@ -282,64 +282,62 @@
   gap: 16px;
 }
 
-/* --- Upper section --- */
+/* --- TICKET TOP (UPPER SECTION) --- */
+
+.ticket-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Route container */
 .route {
   display: flex;
   align-items: center;
-  gap: 12px;
-  position: relative;
+  gap: 16px;
 }
 
-/* FIXED graphic layout */
-.route-graphic {
+/* Column for each city + dot */
+.route-column {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 6px;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  background: #1b4e66;
-  border-radius: 50%;
-}
-
-.route-line {
-  width: 80px;        /* FIXED length */
-  height: 3px;
-  background: #1b4e66;
-  border-radius: 999px;
-}
-
-/* Labels aligned under the endpoints */
-.route-labels {
-  display: flex;
-  justify-content: space-between;
-  width: 120px;       /* MUST MATCH (dot + line + dot width) */
-  margin-top: 6px;
-}
-
+/* City names */
 .loc {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   white-space: nowrap;
   text-align: center;
 }
 
-/* Long centered rounded line */
-.route-line {
-  width: 90px;
-  height: 3px;
+/* Dots at endpoints */
+.dot {
+  width: 12px;
+  height: 12px;
   background: #1b4e66;
-  border-radius: 999px;
+  border-radius: 50%;
 }
 
-/* Type label */
+/* Rounded connecting line */
+.route-line {
+  height: 3px;
+  width: 95px;               /* adjust length as needed */
+  background: #1b4e66;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+/* Type label (optional) */
 .type-label {
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
-  margin-left: 6px;
+  margin-left: 8px;
+  white-space: nowrap;
 }
 
 /* Price right-aligned */
@@ -349,6 +347,7 @@
   color: var(--blue);
   white-space: nowrap;
 }
+
 
 /* --- Lower section --- */
 .ticket-bottom {
@@ -769,25 +768,30 @@ function renderGrouped(list){
 
       ticket.innerHTML = `
       <!-- Upper section -->
-      <div class="ticket-top" role="button" tabindex="0">
+      <div class="ticket-top">
 
-        <div class="route">
-          <div class="route-graphic">
-            <span class="dot"></span>
-            <span class="route-line"></span>
-            <span class="dot"></span>
-          </div>
-      
-          <div class="route-labels">
-            <span class="loc">${escapeHtml(from)}</span>
-            <span class="loc">${escapeHtml(to)}</span>
-          </div>
-      
-          ${typeLabel ? `<small class="type-label">• ${escapeHtml(typeLabel)}</small>` : ''}
-        </div>
-      
-        <div class="price">${escapeHtml(price)}</div>
-      </div>
+  <div class="route">
+
+    <div class="route-column">
+      <span class="loc">${escapeHtml(from)}</span>
+      <span class="dot"></span>
+    </div>
+
+    <span class="route-line"></span>
+
+    <div class="route-column">
+      <span class="loc">${escapeHtml(to)}</span>
+      <span class="dot"></span>
+    </div>
+
+    ${typeLabel ? `<small class="type-label">• ${escapeHtml(typeLabel)}</small>` : ''}
+
+  </div>
+
+  <div class="price">${escapeHtml(price)}</div>
+
+</div>
+
 
     
       <!-- Lower section -->
@@ -801,8 +805,8 @@ function renderGrouped(list){
     `;
 
 
-      ticket.querySelector('.ticket').addEventListener('click', ()=>openDetail(item));
-      ticket.querySelector('.ticket').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
+      ticket.querySelector('.ticket-top').addEventListener('click', ()=>openDetail(item));
+      ticket.querySelector('.ticket-top').addEventListener('keydown', (e)=>{ if (e.key==='Enter') openDetail(item); });
       ticket.querySelector('.whatsapp-btn').addEventListener('click', (ev)=>{
         ev.stopPropagation();
         const wa = ev.currentTarget.dataset.wa || '';
