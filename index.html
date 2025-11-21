@@ -745,29 +745,27 @@ function renderGrouped(list){
       const cleanMobile = mobile.replace(/\D/g, "");
 
       ticket.innerHTML = `
-  <!-- Upper section -->
-  <div class="ticket-top" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
-
-    <div class="route">
-      <span class="loc">${escapeHtml(from)}</span>
-      <div class="route-line"></div>
-      <span class="loc">${escapeHtml(to)}</span>
-      ${typeLabel ? `<small class="type-label">• ${escapeHtml(typeLabel)}</small>` : ''}
-    </div>
-
-    <div class="price">${escapeHtml(price)}</div>
-  </div>
-
-  <!-- Lower section -->
-  <div class="ticket-bottom">
-    <span class="user-name">${escapeHtml(name)}</span>
-
-    <button class="whatsapp-btn" data-wa="${cleanMobile}">
-      WhatsApp
-    </button>
-  </div>
-`;
-
+      <!-- Upper section -->
+      <div class="ticket-top" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(name)}">
+    
+        <div class="route">
+          <span class="loc">${escapeHtml(from)}</span>
+          <div class="route-line"></div>
+          <span class="loc">${escapeHtml(to)}</span>
+          ${typeLabel ? `<small class="type-label">• ${escapeHtml(typeLabel)}</small>` : ''}
+        </div>
+    
+        <div class="price">${escapeHtml(price)}</div>
+      </div>
+    
+      <!-- Lower section -->
+      <div class="ticket-bottom">
+        <span class="user-name">${escapeHtml(name)}</span>
+    
+        <button class="whatsapp-btn" data-wa="${cleanMobile}">
+          WhatsApp
+        </button>
+      </div>
     `;
 
 
