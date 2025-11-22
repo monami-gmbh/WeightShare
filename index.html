@@ -1039,6 +1039,14 @@ async function handleAddSubmit(e) {
   const f = new FormData(e.target);
   const obj = Object.fromEntries(f.entries());
 
+  const from = document.getElementById("rfrom").value.trim();
+  const to   = document.getElementById("rto").value.trim();
+  
+  if (from && to && from.toLowerCase() === to.toLowerCase()) {
+      showToast("Please choose two different locations.", { auto: 2000 });
+      return;
+  }
+  
   // Ensure price null when omitted
   if (!obj.price_per_kg || obj.price_per_kg === '') obj.price_per_kg = null;
 
