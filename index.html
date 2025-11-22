@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -112,15 +113,33 @@
     }
     
     /* Fix width balancing */
-    #rcountrycode {
-      width: 80px !important;
-      flex-shrink: 0 !important;
-    }
-    
-    #rmobile {
-      flex: 1 !important;
-      min-width: 0 !important;
-    }
+      .mobile-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    width: 100% !important;
+    align-items: center !important;
+  }
+
+  /* Country code dropdown fixed width */
+  #rcode {
+    width: 100px !important;
+    min-width: 100px !important;
+    flex: 0 0 110px !important;
+  }
+
+  /* Mobile number expands */
+  #rmobile {
+    flex: 1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Override the global modal rule forcing 100% width */
+  .mobile-wrapper select,
+  .mobile-wrapper input {
+    width: auto !important;
+  }
 
   }
   /* --- MOBILE OPTIMIZATION END --- */
