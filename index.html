@@ -54,7 +54,16 @@
   .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:12px 18px;border-radius:10px;z-index:999999;box-shadow:0 8px 24px rgba(2,6,23,0.18)}
   .success-modal .modal{max-width:520px;text-align:center}
   .copy-btn{background:#fff;color:var(--success);border:1px solid rgba(255,255,255,0.18);padding:8px 10px;border-radius:8px;cursor:pointer}
+#toastRoot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 999999; /* Bring to front */
+  pointer-events: none;
+}
 
+  
   /* --- Autocomplete Styles --- */
   .autocomplete-container { position: relative; width: 100%; }
   .autocomplete-list {
