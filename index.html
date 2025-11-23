@@ -850,33 +850,64 @@ function openDetail(item){
   root.style.display = 'block';
   const price = (item.price_per_kg !== undefined && item.price_per_kg !== null && item.price_per_kg !== '') ? `${item.price_per_kg} €/kg` : 'VB';
   const created = item.createdat ? new Date(item.createdat).toLocaleString() : '';
-  root.innerHTML = `
-    <div class="modal-backdrop" role="dialog" aria-modal="true">
-      <div class="modal">
-        <h3 style="margin-top:0">${escapeHtml(item.from_loc || item.from || '')} → ${escapeHtml(item.to_loc || item.to || '')}</h3>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <div style="flex:1">
-            <p><strong>${escapeHtml(item.name || '—')}</strong></p>
-            <p class="small-muted">Type: ${escapeHtml((item.type || '—'))}</p>
-            <p class="small-muted">Date: ${escapeHtml(item.datepickup || '—')}</p>
-            <p class="small-muted">Phone: ${item.mobile ? escapeHtml('+' + item.mobile) : '—'}</p>
-            <p class="small-muted">Email: ${escapeHtml(item.email || '—')}</p>
-            <p style="margin-top:8px">${escapeHtml((item.additionalinfo||'').replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''))}</p>
-          </div>
-          <div style="width:160px;text-align:right">
-            <div style="font-size:14px;color:var(--muted)">Price</div>
-            <div style="font-weight:800;font-size:18px">${escapeHtml(price)}</div>
-            <div style="margin-top:14px;color:var(--muted);font-size:12px">${escapeHtml(created)}</div>
-          </div>
+root.innerHTML = `
+  <div class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+
+      <!-- TWO-COLUMN LAYOUT -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+
+        <!-- LEFT COLUMN: ROUTE -->
+        <div style="flex:1">
+          <div style="font-size:14px;color:var(--muted)">Route</div>
+
+          <!-- Keep original <h3> so nothing breaks -->
+          <h3 style="margin-top:0;color: var(--blue);">
+            ${escapeHtml(item.from_loc || item.from || '')}
+            →
+            ${escapeHtml(item.to_loc || item.to || '')}
+          </h3>
+          <div style="margin-top:0;color:var(--muted);font-size:12px">Created on: ${escapeHtml(created)}</div>
         </div>
 
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-          <button id="closeDetailBtn" class="btn ghost">Close</button>
-          <button id="closeRequestBtn" class="btn" style="background:#ef4444">Close Request</button>
+        <!-- RIGHT COLUMN: PRICE -->
+        <div style="width:max-content;text-align:right">
+          <div style="font-size:14px;color:var(--muted)">Price</div>
+          <div style="font-weight:800;font-size:18px;color: var(--blue);">${escapeHtml(price)}</div>
         </div>
+
       </div>
+<!-- SEPARATOR -->
+      <div style="border-top:1px solid rgba(0,0,0,0.12); margin:14px 0; padding-top:0;"></div>
+
+
+      <!-- FULL-WIDTH LOWER SECTION -->
+      <div style="margin-top:10px">
+        <p><strong>${escapeHtml(item.name || '—')}</strong></p>
+        <p class="small-muted">Type: ${escapeHtml((item.type || '—'))}</p>
+        <p class="small-muted">Date: ${escapeHtml(item.datepickup || '—')}</p>
+        <p class="small-muted">Phone: ${item.mobile ? escapeHtml('+' + item.mobile) : '—'}</p>
+        <p class="small-muted">Email: ${escapeHtml(item.email || '—')}</p>
+        <p style="margin-top:8px">
+          ${escapeHtml((item.additionalinfo || '')
+            .replace(/^Type:\s*(shipper|traveller)[:\-\s]*/i,''))}
+        </p>
+      </div>
+
+      <!-- BUTTONS -->
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button id="closeDetailBtn" class="btn ghost">Close</button>
+        <button id="closeRequestBtn" class="btn" style="background:#ef4444">Close Request</button>
+      </div>
+
     </div>
-  `;
+  </div>
+`;
+
+
+  
+  
+  
   document.getElementById('closeDetailBtn').addEventListener('click', closeModalRoot);
   document.getElementById('closeRequestBtn').addEventListener('click', async ()=>{
     const confirmId = prompt('To confirm closing, enter the request ID:');
