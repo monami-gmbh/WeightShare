@@ -895,10 +895,26 @@ root.innerHTML = `
       </div>
 
       <!-- BUTTONS -->
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-        <button id="closeDetailBtn" class="btn ghost">Close</button>
-        <button id="closeRequestBtn" class="btn" style="background:#ef4444">Close Request</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+      
+        <!-- LEFT SIDE: Extra Communication Link Button -->
+        <div id="extraCommWrapper" style="display:flex;gap:8px;">
+          <!-- This button is only injected/visible when extra link exists -->
+          <!-- Example:
+          <a id="extraCommBtn" href="#" target="_blank" class="btn" style="background:#3b82f6">
+            Open Link
+          </a>
+          -->
+        </div>
+      
+        <!-- RIGHT SIDE: Existing Buttons -->
+        <div style="display:flex;gap:8px;">
+          <button id="closeDetailBtn" class="btn ghost">Close</button>
+          <button id="closeRequestBtn" class="btn" style="background:#ef4444">Close Request</button>
+        </div>
+      
       </div>
+
 
     </div>
   </div>
@@ -906,7 +922,19 @@ root.innerHTML = `
 
 
   
+  // Insert the communication link button (ONLY if link exists)
+  const extraCommWrapper = document.getElementById('extraCommWrapper');
+  extraCommWrapper.innerHTML = ''; // clear old content
   
+  if (item.extra_link && item.extra_link.trim() !== '') {
+    const btn = document.createElement('a');
+    btn.href = item.extra_link;
+    btn.target = '_blank';
+    btn.className = 'btn';
+    btn.style.background = '#3b82f6';
+    btn.textContent = 'Communication Link';
+    extraCommWrapper.appendChild(btn);
+  }
   
   document.getElementById('closeDetailBtn').addEventListener('click', closeModalRoot);
   document.getElementById('closeRequestBtn').addEventListener('click', async ()=>{
@@ -1031,6 +1059,7 @@ function openAddModal(){
               </div>
             </div>
             <div class="form-group" style="grid-column:1/-1"><label for="remail">Email (optional)</label><input id="remail" name="email" type="email" /></div>
+            <div class="form-group" style="grid-column:1/-1"><label for="extraLink">Extra Communication Link (optional)</label><input id="extraLink" name="extra_link" type="url" placeholder="https://facebook.com/username" /></div>
             <div class="form-group" style="grid-column:1/-1"><label for="rnotes">Additional info (optional)</label><textarea id="rnotes" name="additionalinfo" placeholder="Any notes (fragile, size, pickup location, ... )"></textarea></div>
           </div>
           <div class="modal-actions">
@@ -1078,6 +1107,16 @@ async function handleAddSubmit(e) {
   e.preventDefault();
   const f = new FormData(e.target);
   const obj = Object.fromEntries(f.entries());
+
+  // Normalize extra link
+  if (obj.extra_link) {
+    obj.extra_link = obj.extra_link.trim();
+    if (obj.extra_link && !obj.extra_link.startsWith("http")) {
+      obj.extra_link = "https://" + obj.extra_link;
+    }
+  } else {
+    obj.extra_link = null;
+  }
 
   const from = document.getElementById("rfrom").value.trim();
   const to   = document.getElementById("rto").value.trim();
